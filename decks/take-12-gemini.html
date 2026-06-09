@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go2 — The Return Case</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --surface-color: #121214;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #3b82f6; /* Disciplined institutional blue */
+            --border-color: rgba(255, 255, 255, 0.08);
+            --font-main: 'Inter', sans-serif;
+            --transition-speed: 0.4s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Deck Container */
+        #deck {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Slide Styles */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+            transform: translateY(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem 6rem 2rem;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .slide-content {
+            width: 100%;
+            max-width: 1100px;
+            height: 100%;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Grid Layouts for Content */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .sidebar-layout {
+            display: grid;
+            grid-template-columns: 3fr 7fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .text-highlight {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .accent-text {
+            color: var(--accent-color);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        ul li {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        ul li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        /* Numbered Section Header */
+        .section-num {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Data Cards / Tables */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .data-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .data-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .data-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Specific Slide Tweaks */
+        .mega-stat {
+            font-size: 6rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .thesis-box {
+            border-left: 2px solid var(--accent-color);
+            padding-left: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        /* Controls */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3rem;
+            background: linear-gradient(to top, rgba(10,10,12,1) 0%, rgba(10,10,12,0) 100%);
+            z-index: 100;
+        }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        button.nav-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button.nav-btn:hover {
+            background: var(--surface-color);
+            border-color: var(--text-secondary);
+        }
+
+        button.nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        button.nav-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        #counter {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot:hover {
+            background: var(--text-secondary);
+        }
+
+        .dot.active {
+            background: var(--accent-color);
+            transform: scale(1.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar-layout, .split-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .slide-content { justify-content: flex-start; padding-top: 2rem; }
+            .mega-stat { font-size: 4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="deck">
+        <!-- Slide 0: Title -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div style="max-width: 800px;">
+                    <span class="section-num">Go2</span>
+                    <h1>The Return Case for a Disciplined Investor</h1>
+                    <div class="thesis-box">
+                        <p class="text-highlight">Strip the AI narrative away and look at the unit economics.</p>
+                        <p>Go2 has a real, profitable, 8-year staffing business with negative churn and a proprietary data asset no funded competitor can buy. The new software product turns that data into near-zero-marginal-cost intelligence and automation engagements.</p>
+                        <p>You already concluded the structure prices like a license — judged at roughly 8.5-12x earnings. Jeff, Langberg walked you through the enterprise vision. <strong>This is the skeptic's version: the floor, not the dream.</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 1: Problem -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">01</span>
+                    <h2>The problem is structural, not hype.</h2>
+                </div>
+                <div>
+                    <p>Every AI tool on the market works on what a person explicitly hands it — the prompt, the ticket, the CRM record, the chat log.</p>
+                    <p class="text-highlight">None of them work from what people actually do all day.</p>
+                    <p>The real recurring work worth automating lives in the invisible gap between what someone tells a tool and what they actually do across their screen. Go2 starts from the actual work.</p>
+                    <ul>
+                        <li>We observe genuine workflow: keystrokes, app usage, URLs, idle time.</li>
+                        <li>We reconstruct the real process from telemetry, not memory.</li>
+                        <li>This is a difference of input data, not model cleverness.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: What it is -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">02</span>
+                    <h2>Two revenue streams.<br>One already pays the bills.</h2>
+                </div>
+                <div>
+                    <p>Go2 is a workflow-intelligence and labor-to-software conversion company. A skeptic should hold our two revenue streams separately:</p>
+                    
+                    <div class="data-grid" style="grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div class="data-card">
+                            <h3>1. The Staffing Business (The Base)</h3>
+                            <p style="margin-bottom: 0; font-size: 1rem;">Real, profitable, running today. A remote-staffing subscription where staff work on client systems. Pricing is roughly double the cost of the person.</p>
+                        </div>
+                        <div class="data-card" style="border-color: var(--accent-color);">
+                            <h3 class="accent-text">2. The Software Product (The Upside)</h3>
+                            <p style="margin-bottom: 0; font-size: 1rem;">The same telemetry built to match workers now feeds an insight engine. It tells operators exactly how to automate their back office, and ships working automations.</p>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1.5rem; font-size: 1rem;" class="text-highlight">The second stream rides on top of an asset the first stream already built and paid for. That is the crux of the return case.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: The Edge -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">03</span>
+                    <h2>The edge is a data feed, not an algorithm.</h2>
+                </div>
+                <div>
+                    <p>Be skeptical of the model layer. Models are commodity, and the orchestration pipeline is replicable by a funded competitor in 6-12 months.</p>
+                    <p class="text-highlight">The defensible thing is the input. Think of it like a faster market feed.</p>
+                    <p>Go2's edge is raw workflow telemetry—captured locally at the keystroke/URL/app level—that simply cannot be bought or scraped. It works because of that raw data.</p>
+                    <div style="margin-top: 2rem;">
+                        <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">True Defensibility</h3>
+                        <p style="font-size: 1rem;">Speed to market • Data network effects • Implementation lock-in • Privacy-first brand • Existing client distribution</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Proof -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">04</span>
+                    <h2>Proof it works: A real delivered engagement.</h2>
+                </div>
+                <div>
+                    <p>This is not slideware. <strong>Battlbox</strong> (CEO John Roman) is a real, delivered engagement analyzing 5,343 hours of work across 6 people over 6 months.</p>
+                    
+                    <div class="data-grid">
+                        <div class="data-card">
+                            <div class="data-label">Identified Automatable Work</div>
+                            <div class="data-value">190-250<span style="font-size: 1rem; color: var(--text-secondary);"> hrs/mo</span></div>
+                            <p style="font-size: 0.875rem; margin: 0;">Roughly 80-85% of observed work.</p>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-label">Implementation Estimate</div>
+                            <div class="data-value">&lt; 3<span style="font-size: 1rem; color: var(--text-secondary);"> days</span></div>
+                            <p style="font-size: 0.875rem; margin: 0;">Delivered working prototypes, not just PDFs.</p>
+                        </div>
+                    </div>
+
+                    <div class="data-grid" style="margin-top: 1rem;">
+                        <div class="data-card" style="background: transparent; border-color: #333;">
+                            <div class="data-label">Conventional Consulting</div>
+                            <p style="font-size: 1rem; color: var(--text-primary); margin: 0.5rem 0 0 0;">$25K-$50K • 4-8 weeks</p>
+                            <p style="font-size: 0.875rem; margin: 0;">Delivers a PDF, no implementation.</p>
+                        </div>
+                        <div class="data-card" style="border-color: var(--accent-color);">
+                            <div class="data-label accent-text">Go2 Delivery Cost</div>
+                            <p style="font-size: 1rem; color: var(--text-primary); margin: 0.5rem 0 0 0;">~$15 compute • ~1 hour</p>
+                            <p style="font-size: 0.875rem; margin: 0;">No human labor beyond triggering analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Demand -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">05</span>
+                    <h2>Demand signal: Early, real, on their own data.</h2>
+                </div>
+                <div>
+                    <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; letter-spacing: -0.02em;">
+                        6 demos in one week.<br>100% conversion to next steps.
+                    </div>
+                    <p>The reason it converts is that demos run on the prospect's own data, not a canned story. There is no theater to argue with. <em>(Honest caveat: this is demo conversion, not booked revenue).</em></p>
+                    
+                    <div class="thesis-box">
+                        <h3>The Pilot Motion</h3>
+                        <p style="margin-bottom: 0;">A free, two-week, one-person workflow audit requiring about 45 minutes of client time. It converts into a paid team engagement. The cost to Go2 is roughly $50 in AI processing—the hook is not a loss leader.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Margins -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">06</span>
+                    <h2>Why the margins are real, not a story.</h2>
+                </div>
+                <div>
+                    <p>The cost to deliver an audit is dominated by compute, not labor. Customer-acquisition cost is essentially marketing spend plus compute. <strong>This prices like a license: gross and net margins sit close together.</strong></p>
+                    
+                    <div class="data-grid">
+                        <div class="data-card">
+                            <div class="data-label">Realistic Buyer Compute</div>
+                            <div class="data-value">$300-500<span style="font-size: 1rem; color: var(--text-secondary);"> /mo</span></div>
+                            <p style="font-size: 0.875rem; margin: 0;">Adjusted upward for grounded frontier consensus.</p>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-label">Modeled Gross Margin</div>
+                            <div class="data-value">99%+</div>
+                            <p style="font-size: 0.875rem; margin: 0;">A model, not an audited result, but the shape holds.</p>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 2rem;" class="text-highlight">The point survives the haircut: this is a high-margin, low-marginal-cost shape. This is exactly why it should be judged on earnings multiples in the 8.5-12x range.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Staffing Base -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">07</span>
+                    <h2>The staffing base de-risks the whole thing.</h2>
+                </div>
+                <div>
+                    <p>The downside is not a zero. Underneath the software is a staffing business that ran through COVID, is profitable, and operates on a month-to-month subscription.</p>
+                    
+                    <ul style="margin-bottom: 2rem;">
+                        <li><strong>Economics:</strong> ~30% profit margin, negative churn over 5 years.</li>
+                        <li><strong>Expansion:</strong> Land ~2 people (~$7K/mo) → Ramp toward ~$40K/mo.</li>
+                        <li><strong>Scale:</strong> 10 logos have each done >$1M in total revenue.</li>
+                        <li><strong>Current State:</strong> Gross ~$700K-$800K/mo, ~break-even, small $10K-$20K/mo burn.</li>
+                    </ul>
+
+                    <div class="thesis-box" style="border-color: #ef4444;">
+                        <h3 style="color: #ef4444;">The Honest Conflict</h3>
+                        <p style="margin-bottom: 0;">The software is good enough to remove ~80% of the work the staffing business bills for. Cannibalization caused a recent revenue dip. The conflict is real—and it is exactly why the value is migrating to software.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Cumulative Revenue -->
+        <div class="slide">
+            <div class="slide-content" style="align-items: center; text-align: center;">
+                <span class="section-num">08</span>
+                <h2>The single number that anchors durability.</h2>
+                <div class="mega-stat">$50M+</div>
+                <h3 style="font-size: 1.5rem; color: var(--text-secondary); font-weight: 400;">Cumulative Revenue</h3>
+                <p style="max-width: 700px; margin: 2rem auto 0 auto;">This is not a pre-revenue science project asking you to underwrite a thesis. It is an eight-year operating company that has already moved real money through real customers, now repositioning its proven data asset into a higher-margin product.</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Timing -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">09</span>
+                    <h2>Timing & Incumbent Conflict.</h2>
+                </div>
+                <div>
+                    <h3>Why Now?</h3>
+                    <p>The pipeline only became technically possible in <strong>December 2025</strong>, when model context-window, reasoning, and tool-use capabilities crossed the required threshold. The data asset is years old; the ability to monetize it this way is months old.</p>
+                    
+                    <h3 style="margin-top: 2.5rem;">Why not Microsoft?</h3>
+                    <p>The economics are hostile to incumbents.</p>
+                    <ul>
+                        <li>Microsoft bills per seat.</li>
+                        <li>Model providers bill per usage.</li>
+                    </ul>
+                    <p class="text-highlight" style="margin-top: 1rem;">A product whose entire value is removing seats and optimizing away usage is directly opposed to how they make money. Go2 has no such conflict.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Enterprise -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">10</span>
+                    <h2>The enterprise path: Credible, not closed.</h2>
+                </div>
+                <div>
+                    <p>Langberg pitched the enterprise dream. Let me draw the line honestly: enterprise is a credible path, not closed proof. There is no signed enterprise contract or term sheet in this deck.</p>
+                    
+                    <div class="data-grid" style="grid-template-columns: 1fr; gap: 1rem;">
+                        <div class="data-card">
+                            <h3>What is true today:</h3>
+                            <ul style="margin-bottom: 0;">
+                                <li>Enterprise conversations consistently convert into JV/acquisition discussions.</li>
+                                <li>Deep talks with a large VC firm on hardening for enterprise compliance.</li>
+                                <li>The software is SOC 2 compliant on the cloud product used with clients.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 1.5rem;">The deliberate choice is to win SMB first. You cannot harden for enterprise and run the SMB wedge at full speed simultaneously. SMB makes the underlying IP more valuable.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: The Raise -->
+        <div class="slide">
+            <div class="slide-content sidebar-layout">
+                <div>
+                    <span class="section-num">11</span>
+                    <h2>The raise, and what the money buys.</h2>
+                </div>
+                <div>
+                    <p>The round is running at <strong>45</strong> — moved down deliberately from 60, with existing investors in at 40. That repricing is a signal of discipline: the number was set to clear, not to flatter.</p>
+                    
+                    <h3>Use of Funds (Capital Disciplined)</h3>
+                    <p>A sales team, a marketing funnel, hardening the story, and ~one engineering hire for enterprise security. We favor keeping >50% as dry powder based on historical lessons with time-to-recover CAC.</p>
+
+                    <div class="thesis-box">
+                        <h3 class="accent-text">The Decision</h3>
+                        <p style="margin-bottom: 0;">Jeff — you are already in for 600-700K and framed this as a license-quality business. This deck is the grounded floor under that view: a profitable base, real delivered product, near-zero marginal cost, and a credible enterprise path. The decision is whether to size up into that floor.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+        <div class="nav-group">
+            <div id="counter">01 / 12</div>
+        </div>
+        <div id="dots">
+            <!-- Injected via JS -->
+        </div>
+        <div class="nav-group">
+            <button class="nav-btn" id="prevBtn" aria-label="Previous Slide">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <button class="nav-btn" id="nextBtn" aria-label="Next Slide">
+                <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const counter = document.getElementById('counter');
+            const dotsContainer = document.getElementById('dots');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            // Initialize dots
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+            const dots = document.querySelectorAll('.dot');
+
+            function updateUI() {
+                // Update slides
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update dots
+                dots.forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+
+                // Update counter
+                counter.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+
+                // Update buttons
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    currentSlide = index;
+                    updateUI();
+                }
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateUI();
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateUI();
+                }
+            }
+
+            // Event Listeners
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'Space') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Initial setup
+            updateUI();
+        });
+    </script>
+</body>
+</html>

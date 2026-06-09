@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go2 — Deck Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0e14;--card:#141925;--line:#232a3a;--text:#e7ecf3;--muted:#8b97ad;--accent:#5b8cff;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+  /* gate */
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
+  #gate .box{text-align:center;max-width:340px;padding:30px}
+  #gate h2{font-weight:800;font-size:22px;margin-bottom:6px}
+  #gate p{color:var(--muted);font-size:14px;margin-bottom:18px}
+  #pw{width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;text-align:center}
+  #go{margin-top:12px;width:100%;padding:12px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+  #err{color:#ff7a7a;font-size:13px;margin-top:10px;height:16px}
+  /* content */
+  #app{display:none;max-width:1080px;margin:0 auto;padding:44px 26px 80px}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .sub{color:var(--muted);margin-top:8px;font-size:15px;max-width:680px}
+  .pill{display:inline-block;font-size:11px;font-weight:600;color:#9fd3a8;background:#16271a;border:1px solid #244a2c;border-radius:20px;padding:3px 10px;margin-top:10px}
+  h2.sec{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:42px 0 16px;font-weight:700}
+  /* viewer */
+  .viewer{background:#000;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .viewer img{width:100%;display:block}
+  .vbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-top:1px solid var(--line)}
+  .vbar button{background:#1b2233;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer;font-size:14px}
+  .vbar button:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .count{color:var(--muted);font-size:13px}
+  .dl{display:inline-block;margin-top:14px;color:var(--accent);text-decoration:none;font-weight:600;font-size:14px}
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;display:flex;flex-direction:column;gap:10px;transition:.2s}
+  .card:hover{border-color:#33405c;transform:translateY(-2px)}
+  .ttl{font-size:17px;font-weight:700}
+  .desc{color:var(--muted);font-size:13.5px;flex:1}
+  .btns{display:flex;gap:9px;margin-top:4px}
+  .btn{flex:1;text-align:center;padding:9px 0;border-radius:8px;font-weight:600;font-size:13.5px;text-decoration:none;border:1px solid var(--line);color:var(--text);background:#1b2233}
+  .btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .fb{margin-top:46px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:22px}
+</style>
+</head>
+<body>
+<div id="gate"><div class="box">
+  <h2>Go2 — Deck Preview</h2>
+  <p>This is a private preview. Enter the password to view.</p>
+  <input id="pw" type="password" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')check()">
+  <button id="go" onclick="check()">View decks</button>
+  <div id="err"></div>
+</div></div>
+
+<div id="app">
+  <h1>Go2 — Investor Deck Preview</h1>
+  <p class="sub">Early working drafts the team is iterating on. Every claim is sourced from our own materials; placeholders (financials, customer specifics) are held for Scott's source-of-record. Feedback very welcome — this is a draft, not the final.</p>
+  <span class="pill">Private preview · source-checked drafts</span>
+
+  <h2 class="sec">Recommended — current working deck</h2>
+  <div class="viewer">
+    <img id="slide" src="stronger/slide-01.png" alt="slide">
+    <div class="vbar">
+      <button onclick="nav(-1)">‹ Prev</button>
+      <span class="count" id="count">1 / 12</span>
+      <button onclick="nav(1)">Next ›</button>
+    </div>
+  </div>
+  <a class="dl" href="stronger/go2-investor-deck.pptx" download>↓ Download as .pptx</a>
+
+  <h2 class="sec">Alternative angles — five theses, two design treatments each</h2>
+  <div class="grid">
+    <div class="card"><div class="ttl">Investor-ROI floor</div><div class="desc">Strip the AI narrative; underwrite the return on unit economics. The skeptic's floor, not the dream.</div><div class="btns"><a class="btn" href="decks/take-12-gpt.html">A</a><a class="btn" href="decks/take-12-gemini.html">B</a></div></div>
+    <div class="card"><div class="ttl">The disciplined read</div><div class="desc">Every claim labeled by provenance — refuses to print a number the docs don't support. Hands the skeptic the gaps first.</div><div class="btns"><a class="btn" href="decks/take-09-gpt.html">A</a><a class="btn" href="decks/take-09-gemini.html">B</a></div></div>
+    <div class="card"><div class="ttl">One engagement, start to finish</div><div class="desc">Watch a single audit run end-to-end — before, installed, measured, built, worth. If the before/after holds, the rest is repetition.</div><div class="btns"><a class="btn" href="decks/take-24-gpt.html">A</a><a class="btn" href="decks/take-24-gemini.html">B</a></div></div>
+    <div class="card"><div class="ttl">The audit is the funnel</div><div class="desc">Audit → report → retainer; each stage cheap, runs on the prospect's own data, earns the next. A provable GTM mechanism.</div><div class="btns"><a class="btn" href="decks/take-04-gpt.html">A</a><a class="btn" href="decks/take-04-gemini.html">B</a></div></div>
+    <div class="card"><div class="ttl">Speed</div><div class="desc">Install → implemented in two weeks. The wedge is a clock measured in days, not a quarter of consulting.</div><div class="btns"><a class="btn" href="decks/take-11-gpt.html">A</a><a class="btn" href="decks/take-11-gemini.html">B</a></div></div>
+  </div>
+
+  <p class="fb">Tip: open any deck and use ← / → to present. Tell us which direction lands — we'll converge on the one.</p>
+</div>
+
+<script>
+  // soft gate (preview only — not security; underlying files remain reachable)
+  const PW = "go2-preview-2026";
+  function check(){
+    if(document.getElementById('pw').value.trim() === PW){
+      sessionStorage.setItem('go2ok','1');
+      reveal();
+    } else { document.getElementById('err').textContent = 'Incorrect password.'; }
+  }
+  function reveal(){ document.getElementById('gate').style.display='none'; document.getElementById('app').style.display='block'; }
+  if(sessionStorage.getItem('go2ok')==='1') reveal(); else setTimeout(()=>document.getElementById('pw').focus(),50);
+  // slide viewer
+  let i=1; const N=12;
+  function nav(d){ i=((i-1+d+N)%N)+1; const s=String(i).padStart(2,'0'); document.getElementById('slide').src='stronger/slide-'+s+'.png'; document.getElementById('count').textContent=i+' / '+N; }
+  document.addEventListener('keydown',e=>{ if(document.getElementById('app').style.display!=='none'){ if(e.key==='ArrowRight')nav(1); if(e.key==='ArrowLeft')nav(-1);} });
+</script>
+</body>
+</html>

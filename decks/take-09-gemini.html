@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go2 — The Disciplined Read</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FAFAFA;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --accent-green: #059669;
+            --accent-proposed: #D97706;
+            --accent-path: #2563EB;
+            --border-color: #E5E7EB;
+            --ui-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Deck Container */
+        #deck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Slides */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 6rem 10vw 8rem 10vw;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: var(--bg-color);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            z-index: 10;
+        }
+
+        .slide.prev-slide {
+            transform: translateY(-20px);
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-bottom: 2.5rem;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+        }
+
+        .lead {
+            font-size: 1.75rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        ul li {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            position: relative;
+            padding-left: 2rem;
+            max-width: 950px;
+        }
+
+        ul li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--text-muted);
+        }
+
+        /* Tags / Badges for Discipline */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .tag.green { background: #D1FAE5; color: var(--accent-green); }
+        .tag.proposed { background: #FEF3C7; color: var(--accent-proposed); }
+        .tag.path { background: #DBEAFE; color: var(--accent-path); }
+
+        /* Specific Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: var(--ui-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .stat-box .label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .stat-box .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .quote-block {
+            border-left: 4px solid var(--accent-green);
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .quote-block p {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        .sourcing-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .sourcing-text li {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            padding-left: 1rem;
+        }
+        .sourcing-text li::before { content: "•"; }
+
+        /* Controls */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5rem;
+            background: var(--ui-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 3rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            color: var(--accent-green);
+        }
+
+        .nav-btn:disabled {
+            color: var(--text-muted);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #progress-container {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        #dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .dot:hover {
+            transform: scale(1.5);
+        }
+
+        .dot.active {
+            background: var(--text-main);
+        }
+
+        #counter {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .lead, p, ul li { font-size: 1.125rem; }
+            .grid-2, .stats-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .slide { padding: 4rem 5vw 6rem 5vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="deck">
+        
+        <!-- Slide 0: Title -->
+        <div class="slide active">
+            <div class="slide-content" style="text-align: center; align-items: center;">
+                <span class="tag green" style="margin-bottom: 2rem;">Fact-Checked</span>
+                <h1>Go2 — The Disciplined Read</h1>
+                <p class="lead" style="max-width: 800px; text-align: center; margin: 0 auto;">
+                    You have already heard the enterprise version of this story. This deck is the opposite: every claim is labeled by where it comes from, every claim that is not yet proven is flagged as not-yet-proven, and we will not put a number on a slide that our own documents do not support.
+                </p>
+                <div style="margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--border-color); max-width: 600px;">
+                    <p style="font-size: 1.125rem; color: var(--text-main); font-weight: 500; text-align: center;">
+                        We would rather underclaim and be right than pitch you something you have already learned to discount. The business under the claims is real and has one delivered proof point — and that is what we are asking you to underwrite.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 1: How to read -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>1. Read this first: how to read this deck</h2>
+                <p class="lead">Before any claim, here is the discipline we are holding ourselves to, because we assume you have already been pitched the inflated version.</p>
+                
+                <div style="margin-top: 3rem;">
+                    <div style="margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1.5rem;">
+                        <span class="tag green" style="margin-top: 0.25rem;">Green</span>
+                        <p style="margin: 0; color: var(--text-main);"><strong>A fact we will stand behind:</strong> it came from our own operational records or a delivered client engagement.</p>
+                    </div>
+                    <div style="margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1.5rem;">
+                        <span class="tag proposed" style="margin-top: 0.25rem;">Proposed</span>
+                        <p style="margin: 0; color: var(--text-main);"><strong>Our current thinking, not validated.</strong> Pricing is the main one. We will say "proposed" every time.</p>
+                    </div>
+                    <div style="margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1.5rem;">
+                        <span class="tag path" style="margin-top: 0.25rem;">Path, not proof</span>
+                        <p style="margin: 0; color: var(--text-main);"><strong>A direction we are pursuing that has NOT closed.</strong> We will never call it a deal.</p>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 2rem; font-weight: 500;">If a slide does not tell you which of these it is, that is a bug. Everything ends with a Sourcing section so you can check our work.</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: The Problem -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>2. The problem: AI works on what you hand it; work happens where you don't</h2>
+                <div class="quote-block">
+                    <p>Go2 starts from the actual work instead of from the artifacts people remember to log.</p>
+                </div>
+                <p>Today's AI tools only act on what someone explicitly hands them — a ticket, a CRM record, a chat log. The actual work — what a person does across their apps, tabs, and keystrokes all day — is invisible to those tools.</p>
+                <p>So the highest-leverage, most repetitive work never gets automated, because nobody ever wrote it down.</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: What it is -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>3. What it is, in one sentence we can defend</h2>
+                <p class="lead" style="color: var(--text-main); font-weight: 500; font-size: 2rem; line-height: 1.3;">
+                    You put our software on someone's computer, we read what the work actually is, and we send back exactly how to fix it.
+                </p>
+                <p>Everything beyond that is value-add we charge more for.</p>
+                
+                <h3 style="margin-top: 2rem;">Mechanically:</h3>
+                <ul>
+                    <li>Each team member runs the Cowork.ai desktop app, a local background daemon that captures app and website usage, window titles, URLs, and keystroke activity (with periodic screenshots interpreted locally via OCR).</li>
+                    <li>Every data stream is independently toggleable, and sensitive data (credit cards, SSNs, passwords) is detected and excluded at the daemon level before it ever touches disk.</li>
+                    <li>During the pilot, data lives in a local database on the worker's machine; nothing is uploaded or transmitted.</li>
+                    <li>The data is parsed into structured form and fed into an insight engine that produces a report telling operators where time is recoverable and what to automate.</li>
+                </ul>
+                
+                <div style="background: var(--ui-bg); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                    <p style="margin: 0; font-size: 1rem;"><strong>Compliance Note:</strong> The cloud version of the software (Go2 Desktop) is SOC 2 compliant. The local-only pilot daemon runs the same codebase but is not separately certified; on the pilot, your data simply never leaves the machine.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Proof Point -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>4. The one proof point, fully sourced: Battlbox</h2>
+                <p class="lead">We have one delivered, third-party engagement. We are going to give you all of it and none of the gloss.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="label">Client</div>
+                        <div class="value">Battlbox</div>
+                        <p style="margin: 0; font-size: 0.875rem; margin-top: 0.5rem;">CEO John Roman. A 6-person team.</p>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Analyzed</div>
+                        <div class="value">5,343 hours</div>
+                        <p style="margin: 0; font-size: 0.875rem; margin-top: 0.5rem;">Across 6 people over 6 months of captured data.</p>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Found Automatable</div>
+                        <div class="value">190–250 hrs/mo</div>
+                        <p style="margin: 0; font-size: 0.875rem; margin-top: 0.5rem;">Roughly 80–85% of the total work observed.</p>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Cost to Produce</div>
+                        <div class="value">~$15 compute</div>
+                        <p style="margin: 0; font-size: 0.875rem; margin-top: 0.5rem;">~1 hour processing. No human labor beyond triggering it.</p>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Implementation Estimate</div>
+                        <div class="value">&lt; 3 days</div>
+                        <p style="margin: 0; font-size: 0.875rem; margin-top: 0.5rem;">To stand up the automations.</p>
+                    </div>
+                    <div class="stat-box" style="border-color: var(--accent-green); background: #F0FDF4;">
+                        <div class="label" style="color: var(--accent-green);">Status</div>
+                        <div class="value" style="color: var(--accent-green);">DELIVERED</div>
+                        <p style="margin: 0; font-size: 0.875rem; margin-top: 0.5rem; color: var(--accent-green);">Full audit & working prototype tools (pricing calculator, comment engine, ops dashboard, playbooks).</p>
+                    </div>
+                </div>
+                
+                <p style="font-weight: 600; color: var(--text-main); text-align: center; margin-top: 1rem;">One client. Delivered. We are not going to multiply it into a market.</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: What it does NOT prove -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>5. What the proof point does NOT prove</h2>
+                <p class="lead">A skeptic's first instinct is to find the gap, so here it is from us (said before you ask):</p>
+                
+                <ul style="margin-top: 2rem;">
+                    <li><strong>One delivered audit is not a pattern.</strong> It is one. We are not presenting a portfolio of automated clients.</li>
+                    <li><strong>The economics number ($15 / ~1 hr / no human labor) is our cost to produce a report</strong>, stated by us. It is not a margin claim across a customer base.</li>
+                    <li><strong>80–85% automatable is what we observed in the data</strong>, not what is contracted, running, and saving money in production today.</li>
+                    <li><strong>The working tools are internal working prototypes</strong> against sample schema — they require API, auth, and data integration to run in a customer's live stack. We call them prototypes, not production tools.</li>
+                </ul>
+                
+                <p style="margin-top: 2rem; font-weight: 500; color: var(--text-main);">We would rather you hear these from us than catch us on them.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Demand Signal -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>6. Early demand signal</h2>
+                <p class="lead">Labeled as a signal, not a conversion rate.</p>
+                
+                <div class="quote-block">
+                    <p>In one week we ran 6 Cowork demos and all 6 moved forward.</p>
+                </div>
+                
+                <p>The reason they convert is there is zero theater — the demo runs on the prospect's own data, not a canned example.</p>
+                
+                <div style="background: #FEF2F2; border: 1px solid #FCA5A5; padding: 2rem; border-radius: 8px; margin-top: 3rem;">
+                    <h3 style="color: #991B1B; margin-bottom: 0.5rem;">Required caveat, in our own words:</h3>
+                    <p style="color: #7F1D1D; margin: 0; font-weight: 500;">6 of 6 is a <strong>demo-close rate, not signed invoices.</strong> It is not a paid-conversion number, and we will not present it as one.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Business Underneath -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>7. The business underneath: what the documents support</h2>
+                <p class="lead">We are deliberately not putting financials on this slide that our own documents do not carry. We will walk you through them live, with Andy, against the actual books.</p>
+                
+                <h3 style="margin-top: 2rem;">What the documents do support about the foundation:</h3>
+                <ul>
+                    <li>Go2 <strong>started as a workforce placement and management platform</strong>: job applicants installed our software, it observed how they worked, and it generated a work profile for matching — which is how Go2 got good at local-first data handling.</li>
+                    <li>The same telemetry daemon serves both jobs: matching/placing staff, and generating automation insights. The software half of the product was already running in that hiring pipe; what we are showing you is the second half.</li>
+                    <li>Go2 has an existing base of staffing clients with the software already installed, which is the distribution and data flywheel the new motion sits on top of.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: ICP & Base -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>8. Who this is for, and why the existing base de-risks it</h2>
+                <p class="lead">The customer profile is narrow on purpose, and the existing staffing relationships are the reason the software claims are credible.</p>
+                
+                <ul>
+                    <li><strong>ICP:</strong> Back-office knowledge workers at computers — estimating, dispatch, AR, customer service, admin, support, bookkeeping. Tech-tolerant operators running teams of roughly 5–25 people. Field labor and Fortune 500 enterprise are explicitly out of scope.</li>
+                    <li><strong>The strategic thesis:</strong> Sell the AI layer into existing staffing clients. Because automation can reduce headcount per client, pricing has to offset lost subscription revenue — and the staffing relationships act as distribution plus a data flywheel.</li>
+                    <li>Go2 has an existing base of staffing clients with the software already installed — that is the wedge for distribution.</li>
+                </ul>
+                
+                <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+                    <p style="margin: 0; font-weight: 500; color: var(--text-main);">Staffing is optional to the software thesis. We are not selling it as a dependency. But the installed base is real evidence of reach into the exact ICP.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: GTM -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>9. The go-to-market: a wedge we chose on purpose</h2>
+                <p class="lead">We will tell you the failures too, because they are why the current motion is the right one.</p>
+                
+                <ul>
+                    <li><strong>What went wrong:</strong> By end of 2023 we saw AI starting to cannibalize our own staffing business. We chased a full enterprise motion and <strong>called that focus-split a mistake</strong> — not because we aren't enterprise-ready, but because it pulled us off the wedge. SMB is the wedge.</li>
+                    <li><strong>The structural conflict is resolved:</strong> The old staffing model had a real conflict of interest — selling staffing meant no incentive to automate away your own revenue. As a standalone product motion, that incentive conflict is gone: this is the product now. (The human side of it is still live — a lot of this work is removable, and that is not nothing when you care about the people doing it — but the business is no longer structurally fighting itself).</li>
+                    <li><strong>Why now:</strong> The pipeline became technically possible in <strong>December 2025</strong> (model context-window, reasoning, and tool-use changes), and we spent roughly three months building the orchestration layer on top of it.</li>
+                    <li><strong>The wedge motion:</strong> Sell <strong>managed SMB pilots now</strong> — a free 2-week, one-person pilot → a paid team audit → an implementation retainer — leading with intelligence first, automation second. Not a self-serve platform launch yet.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 10: The Edge -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>10. The edge: the daemon and the data, not a better model</h2>
+                
+                <div style="margin-bottom: 2rem;">
+                    <p>We are not claiming a better AI than the labs. The defensible piece is the proprietary <strong>telemetry daemon</strong> and the granular workflow data it captures — the stream of what work actually is, which competitors starting from tickets and CRM records do not have.</p>
+                </div>
+                
+                <div style="background: var(--ui-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">The Honest Limits:</h3>
+                    <p style="margin: 0;">We will be straight with you: the technical pipeline is replicable by a well-funded competitor in roughly 6–12 months, so this is not a permanent tech moat. The defensibility we are actually underwriting is speed to market, data network effects, implementation lock-in, a privacy-first/local-first brand, and our existing installed-client distribution.</p>
+                </div>
+
+                <ul>
+                    <li>The product is deliberately harness- and AI-provider-agnostic, built on now-standard open building blocks (skills/markdown, MCPs, AGENTS.md).</li>
+                    <li>The framework is open; the telemetry daemon, the processing pipeline, and the insights engine stay proprietary.</li>
+                    <li>It sits as a sidecar alongside Claude, ChatGPT, Codex, or Gemini — it does not need to own the chat window.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 11: Enterprise -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>11. Enterprise: we are enterprise-ready — SMB is a deliberate choice</h2>
+                <p class="lead">Here is where we most refuse to overclaim, because this is where you have already been pitched.</p>
+                
+                <p>Let me be precise, because the easy misread is that we couldn't do enterprise. The opposite is true: <strong>we've been enterprise-ready.</strong></p>
+                
+                <p>What we deprioritized — and our own documents call it a mistake — was splitting focus to chase a full enterprise motion in this window. You can't be enterprise-ready and run the SMB wedge hard at the same time, and I'm consciously choosing the SMB side, because that is what makes the IP way more valuable. SMB is the wedge, and that is the motion we are running.</p>
+                
+                <div style="border-left: 4px solid #991B1B; padding-left: 1.5rem; margin-top: 3rem;">
+                    <h3 style="color: #991B1B;">What we will NOT say:</h3>
+                    <p style="margin: 0; color: var(--text-main);">That there is a signed enterprise customer or a closed deal. We are not putting a logo on this slide. If there is enterprise pull, we will show it to you live, against records — not assert it here as proof.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Pricing -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>12. Pricing: our current thinking</h2>
+                <div style="margin-bottom: 2rem;">
+                    <span class="tag proposed">Proposed, not validated</span>
+                </div>
+                <p class="lead">We are showing you our pricing model so you can pressure-test it, not because it is locked. We have flagged it unvalidated ourselves — ship a price, learn, adjust.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <h3>Proposed Stack</h3>
+                        <ul style="margin-top: 1rem;">
+                            <li><strong>Tier 1:</strong> Free 1-person pilot, 2 weeks of data — the hook.</li>
+                            <li><strong>Tier 2:</strong> Full team audit at $500/person, $2,500 minimum (5-person), with data-period multipliers (15d 0.8x / 30d 1.0x / 60d 1.2x).</li>
+                            <li><strong>Tier 3:</strong> Implementation retainer at $800/person/month, 3-month minimum.</li>
+                            <li><strong>Tier 4:</strong> Automation runtime at $2,500/month per active automated workflow.</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: var(--ui-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 8px; display: flex; flex-direction: column; justify-content: center;">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">Reference Point for Value</h3>
+                        <p style="font-size: 1.125rem; color: var(--text-main); margin-top: 1rem; margin-bottom: 0;">Traditional consulting equivalents run <strong>$25K–$50K over 4–8 weeks</strong> and deliver a PDF with no implementation.</p>
+                        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 1rem; margin-bottom: 0;"><em>(Note: This is market context, not a claimed Go2 result).</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: The Ask -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>13. The ask, sized to what we can defend</h2>
+                <p class="lead">We are raising to scale the SMB wedge — the motion we have a delivered proof point for.</p>
+                
+                <p>We are deliberately not printing a specific check size or valuation on this slide: the precise raise figures and structure live in our live fundraising conversations and are not carried in the product/business documents this deck is sourced against, and current-valuation framing is reds-out in our own corpus.</p>
+                
+                <p>We will size the ask with you directly, against the books, rather than anchor you to a number this deck cannot defend.</p>
+                
+                <div class="quote-block" style="margin-top: 3rem;">
+                    <p style="font-size: 1.25rem; font-style: normal;">One discipline we will hold to in that conversation: we will price in our own historical CAC behavior honestly rather than asking you to discover it. The kind of risk a disciplined investor should price in, we would rather hand you than make you dig for.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Underwriting -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>14. What you are actually underwriting</h2>
+                <p class="lead">Strip the hype and here is the bet, in clearly-labeled facts only:</p>
+                
+                <ul>
+                    <li><span class="tag green">Delivered Proof</span> Battlbox: 5,343 hrs analyzed, 80–85% automatable found, ~$15 to produce, under 3 days to implement. Proves software can read real work and return real fixes.</li>
+                    <li><span class="tag green">Actual Work</span> Local telemetry daemon, sensitive-data excluded at daemon, processed locally — vs competitors starting from tickets/CRM.</li>
+                    <li><span class="tag green">Chosen Wedge</span> Free pilot → audit → retainer. Early, caveated demand signal (6/6 demos advanced in a week, demo-close not paid-conversion).</li>
+                    <li><span class="tag green">Data Asset</span> Proprietary telemetry daemon, provider-agnostic sidecar. Honest caveat: pipeline replicable in 6–12 months. Real moat = speed, data, lock-in, brand, distribution.</li>
+                    <li><span class="tag green">Foundation</span> Origin as a workforce-placement platform whose hiring pipe already ran the software's first half.</li>
+                </ul>
+                
+                <p style="margin-top: 2rem; font-weight: 500; color: var(--text-main);">If you back us, you are backing a real business with one delivered proof and a disciplined plan to make the second, third, and fourth — not a story we have inflated to get the meeting. The financials, the raise size, and the enterprise pull we will put in front of you live, against records — not asserted on a slide our documents cannot support.</p>
+            </div>
+        </div>
+
+        <!-- Slide 15: Sourcing -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Sourcing (Check Our Work)</h2>
+                <div style="column-count: 2; column-gap: 3rem;">
+                    <ul class="sourcing-text">
+                        <li><strong>Slide 2 (problem):</strong> Vision doc §5.1 (lines 102, 288): Go2 starts from "the actual work" vs tickets/CRM/chat logs.</li>
+                        <li><strong>Slide 3 (what it is):</strong> `_src-2.md` §1 (pricing-brief.md); Workflow Discovery Pilot one-pager `_src-5.md` p.1–2 (daemon captures keystrokes/app/URL + ~20s screenshots via OCR; independently toggleable; sensitive data excluded at daemon level; local DB, nothing transmitted during pilot). SOC 2 scope: only cloud Go2 Desktop is SOC 2 compliant; local pilot daemon NOT separately certified.</li>
+                        <li><strong>Slide 4 (Battlbox):</strong> `_src-2.md` §2 (pricing-brief.md, battlbox-playbook/SPEC.md, andy-xavier-email.md), REAL-CLIENT — Battlbox / John Roman / 6 people; 5,343 hrs over 6 months; 190–250 hrs/mo (~80–85%); under 3 days; DELIVERED. Cost to produce: `_src-2.md` §1/§4.</li>
+                        <li><strong>Slide 5 (what it does NOT prove):</strong> Corpus boundaries — single delivered client (§2); unit economics as cost-to-deliver not net margin (§4); "found automatable" vs production; "built" = working prototype against sample schema (`_src-2.md` §13).</li>
+                        <li><strong>Slide 6 (demos):</strong> `_src-2.md` §3 — 6 demos in one week, 6/6 moved forward, prospect's own data; required caveat (demo close rate, not signed-invoice data).</li>
+                        <li><strong>Slide 7 (foundation):</strong> Workflow Discovery Pilot company background `_src-5.md` p.2 (workforce placement platform; local-first); strategic integration thesis `_src-3.md` §A; existing installed-client base `_src-2.md` §1.</li>
+                        <li><strong>Slide 8 (ICP / de-risk):</strong> `_src-1.md` A2 + `_src-2.md` §1 (ICP back-office knowledge workers; field labor out); `_src-3.md` §A (lines 68–72) (tech-tolerant operators, ~5–25 people; Fortune 500 out); integration thesis `_src-3.md` §A.</li>
+                        <li><strong>Slide 9 (GTM):</strong> `_src-2.md` §1 — end-2023 cannibalization, enterprise pivot "a mistake," SMB wedge, conflict-of-interest gone, Dec 2025 technical possibility, ~3 months building; `_src-4.md` §13 (managed SMB pilots now, intelligence-first).</li>
+                        <li><strong>Slide 10 (edge):</strong> `_src-3.md` §A (lines 109–133, 120–121) — open framework / proprietary telemetry daemon; data moat = proprietary telemetry daemon. `_src-2.md` §5 — pipeline replicable in 6–12 months; defensibility = speed, data network effects, lock-in, brand, distribution. Sidecar: `_src-4.md` §6.3/§18.1.</li>
+                        <li><strong>Slide 11 (enterprise):</strong> `_src-2.md` §1 — tried enterprise pivot, called it a mistake, SMB is the wedge; `_src-4.md` §13 — do NOT split focus.</li>
+                        <li><strong>Slide 12 (pricing):</strong> `_src-2.md` §5 (pricing-brief.md) — full Tier 1–4 stack, self-flagged unvalidated. Consulting comparison: `_src-2.md` §4.</li>
+                        <li><strong>Slide 13 (ask):</strong> Scale the SMB wedge; no valuation attached.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div id="controls">
+            <button class="nav-btn" id="prev-btn" onclick="prevSlide()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Prev
+            </button>
+            
+            <div id="progress-container">
+                <div id="dots"></div>
+                <div id="counter">1 / 15</div>
+            </div>
+
+            <button class="nav-btn" id="next-btn" onclick="nextSlide()">
+                Next
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const dotsContainer = document.getElementById('dots');
+        const counter = document.getElementById('counter');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        // Initialize dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+
+        const dots = document.querySelectorAll('.dot');
+
+        function updateUI() {
+            // Update slides classes
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev-slide');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < currentSlide) {
+                    slide.classList.add('prev-slide');
+                }
+            });
+
+            // Update dots
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+
+            // Update counter
+            counter.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${totalSlides}`;
+
+            // Update buttons
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateUI();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateUI();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initial UI setup
+        updateUI();
+    </script>
+</body>
+</html>

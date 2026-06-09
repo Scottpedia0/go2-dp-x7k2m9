@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go2 | From Install to Implemented in Two Weeks</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #09090b; /* Zinc 950 */
+            --text-primary: #f4f4f5; /* Zinc 100 */
+            --text-secondary: #a1a1aa; /* Zinc 400 */
+            --accent: #3b82f6; /* Blue 500 */
+            --accent-dim: rgba(59, 130, 246, 0.2);
+            --border: #27272a; /* Zinc 800 */
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Deck Container */
+        #deck {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Slide Styles */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 8vh 12vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.6s;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            z-index: 10;
+        }
+
+        /* Typography */
+        .slide-number {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slide-number::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background-color: var(--accent);
+        }
+
+        h1 {
+            font-size: clamp(3rem, 5vw, 5rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 3.5vw, 3.5rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 2.5rem;
+            color: #ffffff;
+            max-width: 900px;
+        }
+
+        .subtitle {
+            font-size: clamp(1.25rem, 2vw, 1.75rem);
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            font-size: clamp(1.125rem, 1.5vw, 1.5rem);
+            line-height: 1.6;
+            color: var(--text-secondary);
+            max-width: 850px;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+        }
+
+        p strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Title Slide Specifics */
+        .title-slide h1 {
+            color: var(--accent);
+        }
+        .title-slide .thesis {
+            border-left: 2px solid var(--border);
+            padding-left: 2rem;
+            margin-top: 2rem;
+            font-size: clamp(1rem, 1.25vw, 1.25rem);
+            max-width: 700px;
+        }
+
+        /* Controls */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to top, rgba(9,9,11,1) 0%, rgba(9,9,11,0) 100%);
+        }
+
+        #counter {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            width: 80px;
+        }
+
+        #dots {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot:hover {
+            background-color: var(--text-secondary);
+        }
+
+        .dot.active {
+            background-color: var(--accent);
+            transform: scale(1.5);
+        }
+
+        #nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.2rem;
+        }
+
+        button:hover {
+            border-color: var(--text-secondary);
+            background: rgba(255,255,255,0.05);
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--border);
+            background: transparent;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .slide { padding: 6vh 8vw; }
+            #controls { padding: 1.5rem 2rem; }
+            #dots { display: none; } /* Hide dots on mobile to save space */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="deck">
+        <!-- Slide 0: Title -->
+        <div class="slide active title-slide">
+            <h1>Go2</h1>
+            <div class="subtitle">From Install to Implemented in Two Weeks</div>
+            <p class="thesis">
+                Generic AI tools only act on what a person explicitly hands them, so value waits on someone already knowing what to ask. <strong>Go2 starts from what people actually do</strong> — captured locally, mapped automatically, turned into working automations the client keeps. The wedge is speed: a pilot surfaces real, build-ready value on a clock measured in days, not a quarter of consulting.
+            </p>
+        </div>
+
+        <!-- Slide 1 -->
+        <div class="slide">
+            <div class="slide-number">01</div>
+            <h2>Generic AI only works on what you hand it</h2>
+            <p>
+                Every general AI tool — Claude, ChatGPT, the copilots — is downstream of a human deciding what to type in. It works on what people explicitly hand it. 
+            </p>
+            <p>
+                That gates value on the operator already knowing where their time leaks, which is exactly what they don't know. Go2 inverts it: <strong>it works from what people actually do</strong>, captured at the source, instead of from what someone remembered to describe. Competitors start from tickets, CRM records, or chat logs; Go2 starts from the actual work.
+            </p>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="slide-number">02</div>
+            <h2>A local capture daemon that starts from the real work</h2>
+            <p>
+                Go2 installs a lightweight telemetry daemon on one worker's machine. It runs locally and captures how the work actually happens — every keystroke, app switch, URL, and task pattern, plus periodic screenshots (about every 20 seconds) interpreted on-device via OCR. 
+            </p>
+            <p>
+                That raw stream is the input most tools never get. <strong>Sensitive data — card numbers, SSNs, passwords — is detected and excluded at the daemon level before it ever touches disk</strong>, and every data stream is independently toggleable.
+            </p>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="slide-number">03</div>
+            <h2>~45 minutes of client time, two weeks to delivery</h2>
+            <p>
+                The pilot is deliberately small so value shows up fast. Two weeks, one person, one role, free, no strings. 
+            </p>
+            <p>
+                <strong>Four phases:</strong> a ~30-minute scope call, a 15-minute install, two weeks of passive local collection where the data stays on the worker's machine, and a delivery session where the report is generated live and implemented together. Total client time required is about 45 minutes plus review. No integration, no data migration, no IT project.
+            </p>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <div class="slide-number">04</div>
+            <h2>Mapped in about a week, not a quarter</h2>
+            <p>
+                The grounded articulation of the timeline: install the software, it runs locally and just watches how the work happens, and in about a week the processes are mapped out. The first stretch is observation and mapping with <strong>no integration required</strong>. 
+            </p>
+            <p>
+                Compare that to the alternative the buyer already knows — a consulting engagement that runs four to eight weeks and delivers a PDF with no implementation. Go2 compresses the diagnosis into days and replaces the PDF with working tools.
+            </p>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <div class="slide-number">05</div>
+            <h2>The output is built, not described</h2>
+            <p>
+                Speed only matters if what comes out is usable on arrival. The delivery bar is explicit: <strong>don't describe what could be done — build it and deliver it.</strong> A report that says "you could automate this" is worthless.
+            </p>
+            <p>
+                The product is the working script, connector, or skill. The deliverable is a tailored Opportunity Package: a time audit, automation opportunities ranked by impact, ready-to-use automations, a live implementation, and a recoverable-hours estimate with stated assumptions.
+            </p>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <div class="slide-number">06</div>
+            <h2>Proof the timeline holds: Battlbox</h2>
+            <p>
+                Battlbox is a real, delivered engagement. Go2 analyzed 5,343 hours of work over six months across a six-person team and <strong>surfaced 190-250 hours per month of automatable work</strong> (a deliberately conservative read of the observed work).
+            </p>
+            <p>
+                The implementation estimate to ship the fixes was under three days. Delivered artifacts were real working prototypes: a pricing calculator, a comment-automation engine, an ops dashboard, and implementation playbooks. End to end: observe, surface, build, hand over.
+            </p>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <div class="slide-number">07</div>
+            <h2>The motion runs cheap, demoing on client data</h2>
+            <p>
+                The economics are what make this repeatable. The cost to generate one audit is <strong>about $15 in compute and roughly an hour of processing</strong>, with no human labor beyond triggering the analysis. 
+            </p>
+            <p>
+                The demos use the prospect's own captured data — zero theater — and so far that has landed: six demos were run in one week and all six moved forward. That is a demo conversion, not signed-invoice data, but it is the buyer reacting to their own work, not a pitch.
+            </p>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <div class="slide-number">08</div>
+            <h2>Slots in as a sidecar — no rip-and-replace delay</h2>
+            <p>
+                Nothing about adoption slows the buyer down. Go2 is a sidecar: it works alongside Claude, ChatGPT, Codex, Gemini, internal tools, or a light Go2 surface, and <strong>does not need to own the chat window.</strong>
+            </p>
+            <p>
+                That removes the integration tax that stretches "time to value" into months for most enterprise software. It is why a connector can stand up fast: Go2 built a custom AMS360 connector that is real and shipped-but-near-working.
+            </p>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide">
+            <div class="slide-number">09</div>
+            <h2>The skeptic's read: where the speed claim stops</h2>
+            <p>
+                Disciplined version, no hype. The pipeline is replicable by a funded competitor in roughly 6-12 months. 
+            </p>
+            <p>
+                <strong>Defensibility comes from:</strong> speed to market, data network effects, the proprietary telemetry daemon and the raw behavioral data it produces, implementation lock-in, a privacy-first local-first brand, and existing distribution. The fast-to-value claim is true for what's delivered today; the fully self-serve version is the part still being built.
+            </p>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide">
+            <div class="slide-number">10</div>
+            <h2>Enterprise: a credible path, not closed proof</h2>
+            <p>
+                The same speed wedge scales up, and that's where the larger story lives — but it is a path, not a signed result. 
+            </p>
+            <p>
+                The near-term motion is deliberately <strong>SMB-first</strong>: Go2 is selling managed SMB pilots now and not splitting focus between full enterprise and SMB pilots in this window, keeping the core workflow-truth and control plane closed while proving the market. Enterprise is the next lane rather than a claim of closed enterprise revenue.
+            </p>
+        </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div id="controls">
+        <div id="counter">1 / 11</div>
+        <div id="dots"></div>
+        <div id="nav-buttons">
+            <button id="prev" aria-label="Previous Slide">&larr;</button>
+            <button id="next" aria-label="Next Slide">&rarr;</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const dotsContainer = document.getElementById('dots');
+            const counter = document.getElementById('counter');
+            const btnPrev = document.getElementById('prev');
+            const btnNext = document.getElementById('next');
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            // Initialize dots
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(index));
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = document.querySelectorAll('.dot');
+
+            function updateDeck() {
+                // Update Slides
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update Dots
+                dots.forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+
+                // Update Counter
+                counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+                // Update Button States
+                btnPrev.disabled = currentSlide === 0;
+                btnNext.disabled = currentSlide === totalSlides - 1;
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateDeck();
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateDeck();
+                }
+            }
+
+            function goToSlide(index) {
+                currentSlide = index;
+                updateDeck();
+            }
+
+            // Event Listeners for Buttons
+            btnNext.addEventListener('click', nextSlide);
+            btnPrev.addEventListener('click', prevSlide);
+
+            // Event Listener for Keyboard
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Initial state check
+            updateDeck();
+        });
+    </script>
+</body>
+</html>

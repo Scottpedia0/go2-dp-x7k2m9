@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Go2 — From Install to Implemented in Two Weeks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#101720;
+      --panel-2:#131c27;
+      --text:#eef2f7;
+      --muted:#9aa8b8;
+      --dim:#6f7d8e;
+      --line:rgba(255,255,255,0.09);
+      --accent:#6ea8ff;
+      --accent-soft:rgba(110,168,255,0.12);
+      --shadow:0 20px 60px rgba(0,0,0,0.35);
+      --radius:22px;
+      --slide-pad:clamp(28px,4vw,56px);
+      --maxw:1280px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      height:100%;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(110,168,255,0.08), transparent 60%),
+        radial-gradient(1000px 700px at 90% 90%, rgba(110,168,255,0.05), transparent 60%),
+        linear-gradient(180deg, #0a0f15 0%, #0b1118 100%);
+      color:var(--text);
+      font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      overflow:hidden;
+    }
+
+    .deck{
+      position:relative;
+      width:100%;
+      height:100%;
+    }
+
+    .slides{
+      width:100%;
+      height:100%;
+      position:relative;
+    }
+
+    .slide{
+      position:absolute;
+      inset:0;
+      padding:calc(var(--slide-pad) + 22px) var(--slide-pad) calc(var(--slide-pad) + 86px);
+      display:grid;
+      place-items:center;
+      opacity:0;
+      visibility:hidden;
+      transform:translateX(24px) scale(0.985);
+      transition:
+        opacity .45s ease,
+        transform .45s ease,
+        visibility .45s step-end;
+    }
+
+    .slide.active{
+      opacity:1;
+      visibility:visible;
+      transform:translateX(0) scale(1);
+      transition:
+        opacity .45s ease,
+        transform .45s ease,
+        visibility 0s step-start;
+    }
+
+    .slide.prev{
+      transform:translateX(-24px) scale(0.985);
+    }
+
+    .slide-inner{
+      width:min(100%, var(--maxw));
+      height:min(100%, 860px);
+      display:grid;
+      gap:28px;
+      align-content:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:clamp(28px, 4vw, 56px);
+      position:relative;
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .slide-inner::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(110,168,255,0.08), transparent 28%),
+        linear-gradient(180deg, transparent, rgba(255,255,255,0.01));
+      pointer-events:none;
+    }
+
+    .eyebrow{
+      position:relative;
+      z-index:1;
+      color:var(--accent);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.78rem;
+      font-weight:700;
+    }
+
+    h1,h2{
+      margin:0;
+      position:relative;
+      z-index:1;
+      letter-spacing:-0.04em;
+      line-height:.98;
+      max-width:14ch;
+    }
+
+    h1{
+      font-size:clamp(2.8rem, 7vw, 6.3rem);
+      font-weight:800;
+    }
+
+    h2{
+      font-size:clamp(2rem, 4.9vw, 4.3rem);
+      font-weight:800;
+      max-width:18ch;
+    }
+
+    .subtitle{
+      position:relative;
+      z-index:1;
+      font-size:clamp(1.05rem, 1.8vw, 1.35rem);
+      line-height:1.55;
+      color:var(--muted);
+      max-width:68ch;
+    }
+
+    .thesis{
+      display:grid;
+      grid-template-columns: minmax(0,1.2fr) minmax(280px, .8fr);
+      gap:28px;
+      align-items:start;
+    }
+
+    .thesis-card,
+    .side-card,
+    .metric-card,
+    .quote-card{
+      position:relative;
+      z-index:1;
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:20px 22px;
+    }
+
+    .thesis-card .label,
+    .side-card .label{
+      color:var(--accent);
+      font-size:.78rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      margin-bottom:10px;
+    }
+
+    .thesis-card p,
+    .side-card p,
+    .body p,
+    .quote-card p{
+      margin:0;
+      color:var(--text);
+      line-height:1.62;
+      font-size:clamp(1rem, 1.45vw, 1.12rem);
+    }
+
+    .body{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:28px;
+      align-items:start;
+    }
+
+    .body.single{
+      grid-template-columns: 1fr;
+    }
+
+    .body .main{
+      display:grid;
+      gap:18px;
+      align-content:start;
+    }
+
+    .body .main p{
+      color:#dbe4ee;
+      max-width:72ch;
+    }
+
+    .body .main strong{
+      color:#ffffff;
+      font-weight:700;
+    }
+
+    .stack{
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+
+    .bullet{
+      display:grid;
+      grid-template-columns: 12px 1fr;
+      gap:12px;
+      align-items:start;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:clamp(.98rem, 1.35vw, 1.06rem);
+    }
+
+    .bullet::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      margin-top:.45em;
+      box-shadow:0 0 0 6px var(--accent-soft);
+    }
+
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .metric-card{
+      min-height:128px;
+      display:grid;
+      gap:8px;
+      align-content:start;
+    }
+
+    .metric{
+      font-size:clamp(1.6rem, 3.1vw, 2.6rem);
+      font-weight:800;
+      letter-spacing:-0.04em;
+      color:#fff;
+      line-height:1;
+    }
+
+    .metric-label{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.45;
+    }
+
+    .accent-line{
+      width:64px;
+      height:4px;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--accent), rgba(110,168,255,0.25));
+      margin:8px 0 2px;
+      position:relative;
+      z-index:1;
+    }
+
+    .quote-card{
+      border-left:3px solid var(--accent);
+    }
+
+    .quote-card p{
+      color:#e8eff8;
+      font-size:clamp(1.02rem,1.45vw,1.14rem);
+    }
+
+    .mini{
+      color:var(--dim);
+      font-size:.82rem;
+      line-height:1.5;
+      position:relative;
+      z-index:1;
+    }
+
+    .title-layout{
+      display:grid;
+      gap:26px;
+      align-content:center;
+    }
+
+    .title-grid{
+      display:grid;
+      grid-template-columns: minmax(0,1.1fr) minmax(280px,.9fr);
+      gap:28px;
+      align-items:end;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width:max-content;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.03);
+      color:var(--muted);
+      font-size:.92rem;
+      position:relative;
+      z-index:1;
+    }
+
+    .tag .dot{
+      width:8px;height:8px;border-radius:50%;background:var(--accent);
+      box-shadow:0 0 0 6px var(--accent-soft);
+    }
+
+    .footer{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:50;
+      padding:16px clamp(18px, 3vw, 32px) 20px;
+      pointer-events:none;
+    }
+
+    .footer-inner{
+      width:min(calc(100% - 0px), 1400px);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:16px;
+      align-items:center;
+      pointer-events:auto;
+    }
+
+    .nav{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background:rgba(16,23,32,0.78);
+      color:var(--text);
+      height:44px;
+      min-width:44px;
+      padding:0 16px;
+      border-radius:999px;
+      font:inherit;
+      font-weight:600;
+      cursor:pointer;
+      transition:transform .2s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn:hover{transform:translateY(-1px); background:rgba(23,31,43,0.95); border-color:rgba(255,255,255,0.16)}
+    .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.45; cursor:not-allowed}
+
+    .progress-wrap{
+      display:grid;
+      gap:10px;
+      align-items:center;
+    }
+
+    .counter{
+      color:var(--muted);
+      font-size:.9rem;
+      text-align:center;
+    }
+
+    .dots{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .dot-btn{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      border:none;
+      background:rgba(255,255,255,0.18);
+      cursor:pointer;
+      padding:0;
+      transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .dot-btn:hover{transform:scale(1.15); background:rgba(255,255,255,0.35)}
+    .dot-btn.active{
+      background:var(--accent);
+      box-shadow:0 0 0 5px var(--accent-soft);
+    }
+
+    .keyhint{
+      color:var(--dim);
+      font-size:.84rem;
+      white-space:nowrap;
+    }
+
+    @media (max-width: 980px){
+      .body,
+      .thesis,
+      .title-grid{
+        grid-template-columns:1fr;
+      }
+      .metrics{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+      .slide{
+        padding:20px 18px 110px;
+      }
+      .slide-inner{
+        height:auto;
+        min-height:min(100%, 680px);
+      }
+      h1,h2{max-width:none}
+      .footer-inner{
+        grid-template-columns:1fr;
+      }
+      .nav, .keyhint, .counter{
+        justify-content:center;
+        text-align:center;
+      }
+    }
+
+    @media (max-width: 640px){
+      .metrics{
+        grid-template-columns:1fr;
+      }
+      .btn{
+        height:42px;
+      }
+      .slide-inner{
+        padding:22px 20px;
+        border-radius:18px;
+      }
+      .subtitle,
+      .body .main p,
+      .thesis-card p,
+      .side-card p,
+      .quote-card p{
+        font-size:.98rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <div class="slides">
+
+      <section class="slide active">
+        <div class="slide-inner">
+          <div class="title-layout">
+            <div class="tag"><span class="dot"></span> Investor Deck</div>
+            <div class="title-grid">
+              <div>
+                <div class="eyebrow">Go2</div>
+                <h1>From Install to Implemented in Two Weeks</h1>
+                <div class="accent-line"></div>
+                <p class="subtitle">
+                  Generic AI tools only act on what a person explicitly hands them. Go2 starts from what people actually do — captured locally, mapped automatically, turned into working automations the client keeps.
+                </p>
+              </div>
+              <div class="thesis-card">
+                <div class="label">Thesis</div>
+                <p>
+                  The wedge is speed: a pilot surfaces real, build-ready value on a clock measured in days, not a quarter of consulting. This is the disciplined version — what exists, what the timeline actually is, and where proof stops and the plan begins.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">1. The problem</div>
+          <h2>Generic AI only works on what you hand it</h2>
+          <div class="body">
+            <div class="main">
+              <p>
+                Every general AI tool — Claude, ChatGPT, the copilots — is downstream of a human deciding what to type in. It works on what people explicitly hand it.
+              </p>
+              <p>
+                That gates value on the operator already knowing where their time leaks, which is exactly what they don't know.
+              </p>
+              <p>
+                <strong>Go2 inverts it:</strong> it works from what people actually do, captured at the source, instead of from what someone remembered to describe.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Differentiator</div>
+                <p>Competitors start from tickets, CRM records, or chat logs; Go2 starts from the actual work.</p>
+              </div>
+              <div class="quote-card">
+                <p>Value waits on someone already knowing what to ask. Go2 begins before that point.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">2. What it is</div>
+          <h2>A local capture daemon that starts from the real work</h2>
+          <div class="body">
+            <div class="main">
+              <p>
+                Go2 installs a lightweight telemetry daemon on one worker's machine. It runs locally and captures how the work actually happens — every keystroke, app switch, URL, and task pattern, plus periodic screenshots interpreted on-device via OCR.
+              </p>
+              <p>
+                That raw stream is the input most tools never get.
+              </p>
+              <p>
+                Sensitive data — card numbers, SSNs, passwords — is detected and excluded at the daemon level before it ever touches disk, and every data stream is independently toggleable.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Capture mechanics</div>
+                <div class="bullet">Keystrokes, app switches, URLs, and task patterns</div>
+                <div class="bullet">Periodic screenshots, about every 20 seconds</div>
+                <div class="bullet">OCR interpreted on-device</div>
+                <div class="bullet">Local-first handling with stream-level toggles</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">3. Why speed is the wedge</div>
+          <h2>~45 minutes of client time, two weeks to a built deliverable</h2>
+          <div class="metrics">
+            <div class="metric-card">
+              <div class="metric">2 weeks</div>
+              <div class="metric-label">Pilot duration</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">1 person</div>
+              <div class="metric-label">One worker, one role</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">Free</div>
+              <div class="metric-label">No strings</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">~45 min</div>
+              <div class="metric-label">Total client time required, plus review</div>
+            </div>
+          </div>
+          <div class="body">
+            <div class="main">
+              <p>
+                The pilot is deliberately small so value shows up fast. Four phases: a ~30-minute scope call, a 15-minute install, two weeks of passive local collection where the data stays on the worker's machine, and a delivery session where the report is generated live and implemented together.
+              </p>
+              <p>
+                No integration, no data migration, no IT project — the observation runs in the background while the team keeps working.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Pilot structure</div>
+                <div class="bullet">~30-minute scope call</div>
+                <div class="bullet">15-minute install</div>
+                <div class="bullet">Two weeks of passive local collection</div>
+                <div class="bullet">Live report generation and implementation session</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">4. Timeline</div>
+          <h2>Mapped in about a week, not a quarter</h2>
+          <div class="body">
+            <div class="main">
+              <p>
+                Install the software, it runs locally and just watches how the work happens, and in about a week the processes are mapped out.
+              </p>
+              <p>
+                The first stretch is observation and mapping with no integration required.
+              </p>
+              <p>
+                Compare that to the alternative the buyer already knows — a consulting engagement that runs four to eight weeks and delivers a PDF with no implementation.
+              </p>
+              <p>
+                Go2 compresses the diagnosis into days and replaces the PDF with working tools.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="quote-card">
+                <p>From observation to mapped process in about a week, with no integration required.</p>
+              </div>
+              <div class="side-card">
+                <div class="label">Baseline comparison</div>
+                <p>Consulting: 4–8 weeks and a PDF with no implementation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">5. Output</div>
+          <h2>The output is built, not described</h2>
+          <div class="body">
+            <div class="main">
+              <p>
+                Speed only matters if what comes out is usable on arrival. The delivery bar is explicit: don't describe what could be done — build it and deliver it.
+              </p>
+              <p>
+                A report that says "you could automate this" is worthless; the product is the working script, connector, or skill with install instructions a non-technical operator can run.
+              </p>
+              <p>
+                The deliverable is a Workflow + AI Opportunity Package tailored to the role.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Deliverable contents</div>
+                <div class="bullet">Time audit</div>
+                <div class="bullet">Automation opportunities ranked by impact with confidence scores</div>
+                <div class="bullet">Ready-to-use automations</div>
+                <div class="bullet">Live implementation</div>
+                <div class="bullet">Recoverable-hours estimate with assumptions stated</div>
+              </div>
+              <div class="mini">Built is presented honestly: working prototypes against sample schemas require API, auth, and data integration for a live pilot, not production tools.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">6. Proof the timeline holds</div>
+          <h2>Battlbox</h2>
+          <div class="metrics">
+            <div class="metric-card">
+              <div class="metric">5,343</div>
+              <div class="metric-label">Hours of work analyzed</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">6 months</div>
+              <div class="metric-label">Observation window</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">6 people</div>
+              <div class="metric-label">Team size</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">190–250</div>
+              <div class="metric-label">Hours per month of automatable work surfaced</div>
+            </div>
+          </div>
+          <div class="body">
+            <div class="main">
+              <p>
+                Battlbox is a real, delivered engagement, not a persona.
+              </p>
+              <p>
+                Go2 surfaced 190–250 hours per month of automatable work — and consistent with how Go2 frames every report, that recoverable-hours figure is a deliberately conservative read of the observed work, not a maximal one.
+              </p>
+              <p>
+                The implementation estimate to ship the fixes was under three days.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Delivered artifacts</div>
+                <div class="bullet">Pricing calculator</div>
+                <div class="bullet">Comment-automation engine</div>
+                <div class="bullet">Ops dashboard</div>
+                <div class="bullet">Implementation playbooks</div>
+              </div>
+              <div class="quote-card">
+                <p>That is the speed claim demonstrated end to end — observe, surface, build, hand over.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">7. Motion economics</div>
+          <h2>The motion runs cheap, and the demo is the buyer's own data</h2>
+          <div class="metrics">
+            <div class="metric-card">
+              <div class="metric">~$15</div>
+              <div class="metric-label">Compute cost to generate one audit</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">~1 hour</div>
+              <div class="metric-label">Processing time per audit</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">0</div>
+              <div class="metric-label">Human labor beyond triggering the analysis</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric">6 / 6</div>
+              <div class="metric-label">Demos in one week that moved forward</div>
+            </div>
+          </div>
+          <div class="body">
+            <div class="main">
+              <p>
+                The economics are what make this repeatable. The cost to generate one audit is about $15 in compute and roughly an hour of processing, with no human labor beyond triggering the analysis.
+              </p>
+              <p>
+                The demos use the prospect's own captured data — zero theater.
+              </p>
+              <p>
+                That is a demo conversion, not signed-invoice data, but it is the buyer reacting to their own work, not a pitch.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="quote-card">
+                <p>Zero theater: the buyer sees their own work, not a staged demo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">8. Adoption</div>
+          <h2>It slots in as a sidecar — no rip-and-replace delay</h2>
+          <div class="body">
+            <div class="main">
+              <p>
+                Nothing about adoption slows the buyer down. Go2 is a sidecar: it works alongside Claude, ChatGPT, Codex, Gemini, internal tools, or a light Go2 surface, and does not need to own the chat window.
+              </p>
+              <p>
+                That removes the integration tax that stretches time to value into months for most enterprise software.
+              </p>
+              <p>
+                And it is why a connector can stand up fast: Go2 built a custom AMS360 connector that is real and shipped-but-near-working.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Sidecar posture</div>
+                <div class="bullet">Works alongside existing AI tools</div>
+                <div class="bullet">No need to own the chat window</div>
+                <div class="bullet">Avoids rip-and-replace delay</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">9. The skeptic's read</div>
+          <h2>Where the speed claim stops</h2>
+          <div class="body">
+            <div class="main">
+              <p>
+                Disciplined version, no hype. The pipeline is replicable by a funded competitor in roughly 6–12 months — this is not a defensible tech moat by itself.
+              </p>
+              <p>
+                Defensibility comes from speed to market, data network effects, the proprietary telemetry daemon and the raw behavioral data it produces, implementation lock-in, a privacy-first local-first brand, and existing distribution.
+              </p>
+              <p>
+                The fast-to-value claim is true for what's delivered today; the fully self-serve version is the part still being built.
+              </p>
+            </div>
+            <div class="stack">
+              <div class="side-card">
+                <div class="label">Defensibility</div>
+                <div class="bullet">Speed to market</div>
+                <div class="bullet">Data network effects</div>
+                <div class="bullet">Proprietary telemetry daemon and raw behavioral data</div>
+                <div class="bullet">Implementation lock-in</div>
+                <div class="bullet">Privacy-first local-first brand</div>
+                <div class="bullet">Existing distribution</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="eyebrow">10. Enterprise</div>
+          <h2>A credible path, not closed proof</h2>
+          <div class="body single">
+            <div class="main">
+              <p>
+                The same speed wedge scales up, and that's where the larger story lives — but it is a path, not a signed result.
+              </p>
+              <p>
+                The near-term motion is deliberately SMB-first: Go2 is selling managed SMB pilots now and not splitting focus between full enterprise and SMB pilots in this window, keeping the core workflow-truth and control plane closed while proving the market.
+              </p>
+              <p>
+                Enterprise is the next lane rather than a claim of closed enterprise revenue.
+              </p>
+            </div>
+            <div class="quote-card">
+              <p>SMB-first now; enterprise next. Presented as a credible path, not closed proof.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footer">
+      <div class="footer-inner">
+        <div class="nav">
+          <button class="btn" id="prevBtn" aria-label="Previous slide">← Prev</button>
+          <button class="btn" id="nextBtn" aria-label="Next slide">Next →</button>
+        </div>
+        <div class="progress-wrap">
+          <div class="counter" id="counter">1 / 10</div>
+          <div class="dots" id="dots" aria-label="Slide progress"></div>
+        </div>
+        <div class="keyhint">Use ← → keys to navigate</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dotsWrap = document.getElementById('dots');
+      const counter = document.getElementById('counter');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      let index = 0;
+
+      slides.forEach((_, i) => {
+        const b = document.createElement('button');
+        b.className = 'dot-btn';
+        b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+        b.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(b);
+      });
+
+      const dots = Array.from(document.querySelectorAll('.dot-btn'));
+
+      function render(){
+        slides.forEach((slide, i) => {
+          slide.classList.remove('active','prev');
+          if(i === index) slide.classList.add('active');
+          else if(i < index) slide.classList.add('prev');
+        });
+
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        counter.textContent = (index + 1) + ' / ' + slides.length;
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+      }
+
+      function goTo(i){
+        index = Math.max(0, Math.min(slides.length - 1, i));
+        render();
+      }
+
+      function next(){ goTo(index + 1); }
+      function prev(){ goTo(index - 1); }
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          next();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          prev();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          goTo(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          goTo(slides.length - 1);
+        }
+      });
+
+      let touchStartX = null;
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].clientX;
+      }, {passive:true});
+
+      window.addEventListener('touchend', (e) => {
+        if (touchStartX == null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 50) {
+          if (dx < 0) next();
+          else prev();
+        }
+        touchStartX = null;
+      }, {passive:true});
+
+      render();
+    })();
+  </script>
+</body>
+</html>

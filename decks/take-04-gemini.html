@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go2 — The Audit Is the Proof</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Restrained, VC-tier palette */
+            --bg-color: #FAFAFA;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --accent: #2563EB; /* Disciplined Blue */
+            --accent-light: #EFF6FF;
+            --border: #E5E7EB;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Deck Container */
+        #deck {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Slides */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem 8rem 2rem;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .slide-content {
+            max-width: 960px;
+            width: 100%;
+            transform: translateY(15px);
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, opacity 0.6s ease 0.1s;
+        }
+
+        .slide.active .slide-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        p {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        /* Data Grids */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2.5rem 0;
+        }
+
+        .stat-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Honesty / Precision Notes */
+        .note {
+            margin-top: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--accent-light);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .note p {
+            font-size: 1rem;
+            margin-bottom: 0;
+            color: #1E3A8A;
+        }
+
+        .note strong {
+            color: #1E40AF;
+        }
+
+        /* UI Controls */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to top, rgba(250,250,250,1) 50%, rgba(250,250,250,0));
+            z-index: 100;
+        }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        button.nav-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.2rem;
+        }
+
+        button.nav-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        button.nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        #counter {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            min-width: 3rem;
+            text-align: center;
+        }
+
+        /* Progress Dots */
+        #progress {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #D1D5DB;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot:hover {
+            background: #9CA3AF;
+        }
+
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+
+        /* Title Slide Specifics */
+        .title-slide h1 {
+            font-size: 4.5rem;
+            color: var(--accent);
+        }
+        
+        .title-slide .subtitle {
+            font-size: 2rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.75rem; }
+            p, li { font-size: 1.125rem; }
+            .slide-content { padding: 0 1rem; }
+            #controls { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .title-slide h1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="deck">
+        <!-- Title Slide -->
+        <section class="slide active title-slide">
+            <div class="slide-content" style="text-align: center;">
+                <h1>Go2</h1>
+                <div class="subtitle">The Audit Is the Proof</div>
+                <p style="font-size: 1.5rem; color: var(--text-muted); max-width: 800px; margin: 0 auto;">
+                    Most AI pitches sell a vision. Go2 sells a finished audit. We install a local daemon, watch the actual work, and hand back a concrete recoverable-hours finding plus working tools — for about $15 of compute.
+                </p>
+            </div>
+        </section>
+
+        <!-- Slide 1 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The problem: AI only works on what you hand it</h2>
+                <p>Every AI tool on the market — Claude, ChatGPT, Copilot — works on what a person explicitly types into it. <strong>It sees the prompt, not the job.</strong></p>
+                <p>It has no idea how the work actually happens: the copy-paste between two tabs, the manual routing, the re-prompting, the thing nobody documented because everybody just does it.</p>
+                <p>Go2 starts from the opposite end. We observe how work actually happens, explain where value leaks, and turn the stable recurring parts into maintained automation.</p>
+                <p>Competitors start from tickets, CRM records, or chat logs. <span class="highlight">We start from the actual work.</span></p>
+            </div>
+        </section>
+
+        <!-- Slide 2 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>What it is: A local daemon that turns real work into an audit</h2>
+                <p>The product is a lightweight background process installed on one worker's machine. It captures keystrokes, app usage, URLs, and workflow patterns, plus periodic screenshots (~every 20 seconds) read locally via OCR.</p>
+                <p>An AI agent analyzes that activity and produces a full operational audit: where time goes, what is manual, what is automatable, and how to do it.</p>
+                <p>It is explicitly <strong>not a chatbot, a dashboard, or a copilot</strong>. It is a sidecar.</p>
+                <p>We don't even use our own chat product — we port the data into Claude or ChatGPT, so if we're not going to use our own chat layer, why should the client?</p>
+                <p>The output is not advice. It is <span class="highlight">findings plus working prototype tools, implementation playbooks, and a recoverable-hours estimate.</span></p>
+            </div>
+        </section>
+
+        <!-- Slide 3 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The Golden Rule: Don't describe it, build it</h2>
+                <p>A report that says "you could automate this" is worthless. The product bar is the working script, connector, or skill — with install instructions a non-technical operator can follow — actually delivered.</p>
+                <p>Internally we hold ourselves to one rule: <strong>"Don't describe what could be done. Build it and deliver it."</strong></p>
+                <p>The methodology we teach the client is plain: <span class="highlight">Skills + MCPs + Iteration = Automation.</span></p>
+                <p>The bar for a finished deliverable is surprising, defensible, specific, operator-usable, and repeatable.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Proof: The recoverable-hours finding is concrete</h2>
+                <p>The audit's headline output is a conservative recoverable-hours estimate, derived from observed work, not survey guesses.</p>
+                <ul>
+                    <li><strong>Individual roles:</strong> 50% or more of their time is recoverable (especially for data routing and re-prompting).</li>
+                    <li><strong>Full ops teams:</strong> Typically 30-40% of total team hours.</li>
+                </ul>
+                <p>These are findings off real captures. As a concrete floor: a single two-week capture on one person surfaced <span class="highlight">a minimum of 22 recoverable hours.</span></p>
+                <p>The recoverable-hours number is the wedge: it is specific, defensible, and reframes the conversation from "buy our software" to "here is the capacity sitting idle in your own team."</p>
+            </div>
+        </section>
+
+        <!-- Slide 5 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Proof: Battlbox — a real audit, delivered</h2>
+                <p>This is not a thought experiment. Battlbox (6-person team) is a real, delivered engagement.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">5,343</div>
+                        <div class="stat-label">Hours Analyzed (6mo)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">190-250</div>
+                        <div class="stat-label">Automatable Hrs/Mo</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">< 3 Days</div>
+                        <div class="stat-label">Implementation Est.</div>
+                    </div>
+                </div>
+
+                <p><strong>Shipped:</strong> A pricing calculator, a comment-automation engine, an ops dashboard, and implementation playbooks — working prototypes, DELIVERED.</p>
+                
+                <div class="note">
+                    <p><strong>Honesty note:</strong> "Built" means a working prototype against sample schema; it requires API/auth/data integration for a production pilot. We say that out loud rather than overclaim.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Proof: The demo converts because there's no theater</h2>
+                <p>We ran <span class="highlight">6 Cowork demos in one week and all 6 moved forward</span> — because the demo uses the prospect's own data.</p>
+                <p>There is no slideware, no hypothetical persona; the prospect watches their own work get analyzed.</p>
+                <p>The signal it carries: when an operator sees their own work mapped, they don't argue with it.</p>
+                
+                <div class="note">
+                    <p><strong>Precision:</strong> This is a demo conversion rate, not signed-invoice data. The point of leading with proof is that the proof has to survive scrutiny.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Why it works now, and why the data is the moat</h2>
+                <p>The audit only works because of the raw telemetry — the actual keystroke-and-screen record of how work happens.</p>
+                <p><strong>"It works because of that raw telemetry data, which is the hard part to come by — it wouldn't work without that data."</strong></p>
+                <p>The technical pipeline itself is replicable by a funded competitor in 6-12 months — this is not a patent moat.</p>
+                <p>Defensibility comes from speed to market, the data network effect, implementation lock-in, a privacy-first brand, and existing client distribution.</p>
+                <p>We open-source the framework (skill format, agent-coordination, example skills) and keep proprietary the one thing that's actually hard: <span class="highlight">the telemetry daemon and the pipeline behind it.</span></p>
+            </div>
+        </section>
+
+        <!-- Slide 8 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Privacy is a feature, not a footnote</h2>
+                <p>What we do is intrusive by nature, so the architecture is built privacy-first.</p>
+                <ul>
+                    <li>During the pilot, all data lives in a <strong>local database</strong> on the worker's machine — nothing is uploaded or transmitted.</li>
+                    <li>Sensitive data (CC numbers, SSNs, passwords) is detected and excluded at the daemon level before it ever touches disk.</li>
+                    <li>Every data stream is independently toggleable, and the worker can pause or stop anytime.</li>
+                </ul>
+                <p>The cloud product, <strong>Go2 Desktop, is SOC 2 compliant</strong>, and the pilot daemon is the same codebase.</p>
+
+                <div class="note">
+                    <p><strong>Precision:</strong> The local-only pilot daemon is not separately certified, and local data is protected by the machine's existing security. We state that accurately rather than implying the pilot itself is SOC-2-certified.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The motion: free audit → report → retainer</h2>
+                <p>The go-to-market is a wedge, not a platform launch.</p>
+                <ul>
+                    <li><strong>The hook:</strong> A free 2-week pilot on one person, one role. No strings. Total client time: ~45 minutes (scope call + install) plus review.</li>
+                    <li><strong>The report:</strong> Generated live, implemented together, handed over. The report and automations are the client's.</li>
+                    <li><strong>The expansion:</strong> A full team audit, then a managed implementation retainer.</li>
+                </ul>
+                <p>Why give the first one free? The actual cost to generate a report is <span class="highlight">about $15 in compute</span> — it's not a loss leader. We learn whether the report lands without hand-holding before we ever build self-serve.</p>
+            </div>
+        </section>
+
+        <!-- Slide 10 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The half we already had</h2>
+                <p>This is not a brand-new company chasing an AI trend. <strong>This is not a new product — it just closes the loop in the product we already had.</strong></p>
+                <p>Go2 started as a workforce placement and management business. Job applicants installed the software, which observed how they worked and generated a work profile for matching locally, where data could not leave the device.</p>
+                <p>That is how Go2 got good at local-first data handling.</p>
+                <p>The first half of the product — the capture pipe — already existed and has been operating. What's new is closing the loop: <span class="highlight">the same captured work now writes the automation.</span></p>
+            </div>
+        </section>
+
+        <!-- Slide 11 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The staffing relationship, stated plainly</h2>
+                <p>We are not leading with staffing here — it is optional and software-first. For texture: that business is a profitable, month-to-month subscription model that ran through COVID and is still running.</p>
+                <p>The old staffing model carried a built-in conflict of interest: selling staffing gave us no incentive to automate away our own billable revenue. That structural conflict is resolved now, because the company's value is moving to the software and the data.</p>
+                <p>When the software was handed free to existing staffing customers, it cannibalized that revenue. The discipline we hold today: <strong>we don't sell the standalone software into the existing staffing base.</strong></p>
+                <p>The strategic role of the staffing relationships is <span class="highlight">distribution and a data flywheel.</span></p>
+            </div>
+        </section>
+
+        <!-- Slide 12 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The enterprise path: credible, not closed</h2>
+                <p>There is a real enterprise lane — a path, not a signed proof.</p>
+                <p>The deliberate decision is to run the SMB motion now and not split focus. We are selling managed SMB pilots, leading with intelligence first, and keeping the core control plane closed while we prove the market.</p>
+                <p><strong>"We've been enterprise-ready — but you can't be enterprise-ready and run this SMB motion at the same time. SMB makes the IP far more valuable."</strong></p>
+                <p>Our enterprise conversations have a gravitational tendency to turn into <span class="highlight">joint-venture or acquisition discussions</span> rather than a clean product sale. We push back toward a JV and treat acquisition as a secondary option. That is interest, not a closed deal.</p>
+            </div>
+        </section>
+
+        <!-- Slide 13 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The economics, honestly bounded</h2>
+                <p>The unit math is the reason this is worth a skeptic's time:</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">$25K - $50K</div>
+                        <div class="stat-label">Consulting Equivalent (Delivers a PDF)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">~$15</div>
+                        <div class="stat-label">Our Audit Compute Cost (~1 hr processing)</div>
+                    </div>
+                </div>
+
+                <ul>
+                    <li>The realistic buyer-facing monthly compute figure to plan around is $300-500/mo.</li>
+                    <li>For a client at ~$20K/mo in labor with 80-85% automatable, the audit surfaces on the order of <strong>$200K+/yr in addressable savings.</strong></li>
+                </ul>
+                <p>We sell capacity unlocked, not headcount cut.</p>
+            </div>
+        </section>
+
+        <!-- Slide 14 -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>The ask: disciplined, dry-powder-weighted</h2>
+                <p>The use of funds is unglamorous on purpose: a sales team, a marketing funnel, hardening the story, and roughly one engineering hire for enterprise security and data hardening, run at a modest monthly burn.</p>
+                <p>We strongly favor keeping <span class="highlight">more than half as dry powder</span> — it makes the operating half far more effective.</p>
+                <p>The honest historical lesson we volunteer: as we scaled before, time-to-recover CAC stretched longer than projected. That's a mistake we've lived and will manage against this time.</p>
+                <p>This is confident, not hype: <strong>"We're not going to not build it."</strong> We have the hard half. We're closing the loop.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navigation UI -->
+    <div id="controls">
+        <div class="nav-group">
+            <button class="nav-btn" id="prevBtn" aria-label="Previous Slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div id="counter">1 / 15</div>
+            <button class="nav-btn" id="nextBtn" aria-label="Next Slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+        </div>
+        <div id="progress">
+            <!-- Dots generated by JS -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+            
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const counter = document.getElementById('counter');
+            const progressContainer = document.getElementById('progress');
+
+            // Initialize progress dots
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i));
+                progressContainer.appendChild(dot);
+            }
+            const dots = document.querySelectorAll('.dot');
+
+            function updateUI() {
+                // Update slides
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update dots
+                dots.forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+
+                // Update counter
+                counter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+                // Update buttons
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    currentSlide = index;
+                    updateUI();
+                }
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    goToSlide(currentSlide + 1);
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    goToSlide(currentSlide - 1);
+                }
+            }
+
+            // Event Listeners
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevSlide();
+                }
+            });
+
+            // Initial state
+            updateUI();
+        });
+    </script>
+</body>
+</html>
