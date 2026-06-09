@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Go2 / Cowork.ai — Investor Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#060b08;
+      --bg2:#0a120e;
+      --panel:#0d1511;
+      --text:#f4f7f5;
+      --muted:#95a39a;
+      --soft:#19241d;
+      --line:rgba(255,255,255,.08);
+      --accent:#22c55e;
+      --accent2:#86efac;
+      --shadow:0 20px 80px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      height:100%;
+      background:radial-gradient(circle at 20% 20%, rgba(34,197,94,.08), transparent 28%),
+                 radial-gradient(circle at 80% 70%, rgba(34,197,94,.06), transparent 24%),
+                 linear-gradient(180deg, var(--bg), var(--bg2));
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      overflow:hidden;
+    }
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size:80px 80px;
+      mask-image:radial-gradient(circle at center, black 35%, transparent 85%);
+      pointer-events:none;
+      opacity:.22;
+    }
+
+    .deck{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    .slide{
+      position:absolute;
+      inset:0;
+      padding:clamp(28px,4vw,56px);
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      opacity:0;
+      transform:translateX(40px) scale(.995);
+      transition:opacity .55s ease, transform .55s ease;
+      pointer-events:none;
+    }
+    .slide.active{
+      opacity:1;
+      transform:translateX(0) scale(1);
+      pointer-events:auto;
+    }
+
+    .frame{
+      position:relative;
+      width:100%;
+      height:100%;
+      border:1px solid var(--line);
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .topbar{
+      position:absolute;
+      top:22px; left:28px; right:28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      z-index:5;
+      pointer-events:none;
+    }
+    .brand{
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .brand strong{color:var(--text)}
+    .slideNo{
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:700;
+    }
+
+    .content{
+      position:relative;
+      width:100%;
+      height:100%;
+      padding:clamp(66px,9vh,110px) clamp(28px,6vw,88px) clamp(50px,10vh,90px);
+      display:grid;
+      grid-template-columns:1fr;
+      gap:24px;
+    }
+
+    .eyebrow{
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--accent2);
+      font-weight:700;
+      margin-bottom:8px;
+    }
+    .headline{
+      font-size:clamp(42px,7vw,96px);
+      line-height:.95;
+      letter-spacing:-.05em;
+      font-weight:900;
+      max-width:11ch;
+      margin:0;
+    }
+    .headline.wide{max-width:14ch}
+    .headline.full{max-width:16ch}
+    .sub{
+      margin-top:18px;
+      font-size:clamp(18px,2vw,28px);
+      line-height:1.25;
+      color:var(--muted);
+      max-width:22ch;
+      font-weight:500;
+    }
+    .sub strong{color:var(--text); font-weight:700}
+    .accent{
+      color:var(--accent);
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:min(5vw,56px);
+      height:100%;
+      align-items:center;
+    }
+
+    .rightStage, .leftStage{
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+
+    .giant{
+      font-size:clamp(88px,18vw,260px);
+      line-height:.9;
+      font-weight:900;
+      letter-spacing:-.08em;
+      color:var(--text);
+      opacity:.98;
+    }
+    .giant .tiny{
+      display:block;
+      font-size:clamp(18px,2vw,26px);
+      line-height:1.1;
+      letter-spacing:-.03em;
+      color:var(--muted);
+      font-weight:600;
+      margin-top:18px;
+      max-width:16ch;
+    }
+
+    .quote{
+      font-size:clamp(30px,4.7vw,68px);
+      line-height:1.02;
+      letter-spacing:-.05em;
+      font-weight:800;
+      max-width:12ch;
+    }
+    .quote small{
+      display:block;
+      margin-top:20px;
+      font-size:clamp(15px,1.3vw,18px);
+      line-height:1.4;
+      letter-spacing:0;
+      color:var(--muted);
+      font-weight:600;
+      max-width:26ch;
+    }
+
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      width:min(520px,100%);
+    }
+    .lineCard{
+      padding:18px 20px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+      color:var(--text);
+      font-size:clamp(18px,2vw,26px);
+      line-height:1.12;
+      font-weight:700;
+      letter-spacing:-.03em;
+    }
+    .lineCard span{color:var(--accent2)}
+    .lineCard.muted{color:var(--muted); font-weight:600}
+
+    .diagram{
+      width:min(680px,100%);
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+      align-items:center;
+    }
+    .node{
+      min-height:90px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:14px 10px;
+      font-size:clamp(13px,1.15vw,18px);
+      color:var(--text);
+      font-weight:700;
+      line-height:1.05;
+      letter-spacing:-.02em;
+    }
+    .node.accentNode{
+      border-color:rgba(34,197,94,.35);
+      box-shadow:0 0 0 1px rgba(34,197,94,.14) inset, 0 0 60px rgba(34,197,94,.08);
+    }
+    .arrow{
+      position:absolute;
+      height:2px;
+      background:linear-gradient(90deg, rgba(34,197,94,.05), rgba(34,197,94,.7), rgba(34,197,94,.05));
+      left:12%;
+      right:12%;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:-1;
+      opacity:.8;
+    }
+
+    .twoCols{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:min(4vw,44px);
+      align-items:end;
+      margin-top:24px;
+    }
+    .valueCol{
+      border-top:1px solid var(--line);
+      padding-top:18px;
+    }
+    .valueCol .kicker{
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--accent2);
+      font-weight:800;
+      margin-bottom:10px;
+    }
+    .valueCol .title{
+      font-size:clamp(28px,3.2vw,48px);
+      line-height:.98;
+      letter-spacing:-.04em;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+    .valueCol .desc{
+      font-size:clamp(18px,1.8vw,24px);
+      line-height:1.2;
+      color:var(--muted);
+      max-width:18ch;
+      font-weight:500;
+    }
+
+    .faintWords{
+      position:absolute;
+      inset:auto 0 8% auto;
+      right:6%;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-end;
+      pointer-events:none;
+    }
+    .faintWords div{
+      font-size:clamp(18px,1.7vw,26px);
+      color:rgba(255,255,255,.16);
+      font-weight:700;
+      letter-spacing:-.03em;
+    }
+    .faintWords div:last-child{color:rgba(34,197,94,.62)}
+
+    .proof{
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+      width:min(700px,100%);
+    }
+    .proofLine{
+      font-size:clamp(24px,3vw,44px);
+      line-height:1.04;
+      font-weight:800;
+      letter-spacing:-.04em;
+      padding-bottom:18px;
+      border-bottom:1px solid var(--line);
+    }
+    .proofLine span{color:var(--accent)}
+
+    .askWrap{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:min(5vw,60px);
+      height:100%;
+      align-items:end;
+    }
+    .closing{
+      align-self:center;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border:1px solid rgba(34,197,94,.25);
+      border-radius:999px;
+      color:var(--accent2);
+      background:rgba(34,197,94,.06);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:22px;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:50%; background:var(--accent);
+      box-shadow:0 0 20px rgba(34,197,94,.6);
+    }
+
+    .controls{
+      position:fixed;
+      left:24px;
+      right:24px;
+      bottom:20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      z-index:20;
+      pointer-events:none;
+    }
+    .navGroup, .dotsWrap{
+      pointer-events:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    button.nav{
+      appearance:none;
+      border:none;
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      border:1px solid var(--line);
+      width:50px; height:50px;
+      border-radius:999px;
+      font-size:20px;
+      cursor:pointer;
+      transition:transform .2s ease, background .2s ease, border-color .2s ease;
+      backdrop-filter:blur(8px);
+    }
+    button.nav:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.1);
+      border-color:rgba(255,255,255,.16);
+    }
+    .counter{
+      padding:0 10px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      min-width:72px;
+      text-align:center;
+    }
+    .dots{
+      display:flex;
+      gap:8px;
+      padding:10px 14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:999px;
+      backdrop-filter:blur(8px);
+    }
+    .dots button{
+      width:8px; height:8px;
+      border-radius:50%;
+      border:none;
+      padding:0;
+      background:rgba(255,255,255,.2);
+      cursor:pointer;
+      transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .dots button.active{
+      background:var(--accent);
+      transform:scale(1.3);
+      box-shadow:0 0 18px rgba(34,197,94,.55);
+    }
+
+    @media (max-width: 900px){
+      .split, .askWrap, .twoCols{
+        grid-template-columns:1fr;
+      }
+      .rightStage, .leftStage{
+        min-height:220px;
+      }
+      .diagram{
+        grid-template-columns:1fr 1fr;
+      }
+      .headline{max-width:14ch}
+      .sub{max-width:28ch}
+      .faintWords{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <section class="slide active">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">01</div>
+        </div>
+        <div class="content">
+          <div class="eyebrow">Hook</div>
+          <h1 class="headline full">Stop feeling busy.<br><span class="accent">Start making progress.</span></h1>
+          <div class="sub">A new layer for work: observe what actually happens, surface what matters, and turn recurring labor into software.</div>
+          <div class="faintWords">
+            <div>busy</div>
+            <div>activity</div>
+            <div>progress</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">02</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">The tension</div>
+            <h2 class="headline wide">People feel productive while making <span class="accent">no real progress.</span></h2>
+            <div class="sub">The modern knowledge-worker trap is simple: more AI activity, more tabs, more output — <strong>without forward motion.</strong></div>
+          </div>
+          <div class="rightStage">
+            <div class="quote">“The nine hours I spent in ChatGPT today saved me so much time.”</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">03</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">The problem</div>
+            <h2 class="headline full">The real work is <span class="accent">invisible.</span></h2>
+            <div class="sub">Chats. Tabs. Drafts. Context-switching. Unsaved thinking. AI only acts on <strong>what you hand it.</strong></div>
+          </div>
+          <div class="rightStage">
+            <div class="stack">
+              <div class="lineCard">What happened in <span>chat</span></div>
+              <div class="lineCard">What lived across <span>browser tabs</span></div>
+              <div class="lineCard">What never became a <span>saved file</span></div>
+              <div class="lineCard muted">The most valuable context rarely enters the system of record.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">04</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">The product</div>
+            <h2 class="headline full">A lightweight desktop agent watches how work <span class="accent">really happens.</span></h2>
+            <div class="sub">It runs quietly and securely, captures daily interactions, and returns insight automatically. <strong>No prompts. No guesswork. Just results.</strong></div>
+          </div>
+          <div class="rightStage">
+            <div class="proof">
+              <div class="proofLine">App usage</div>
+              <div class="proofLine">Websites</div>
+              <div class="proofLine">System metrics</div>
+              <div class="proofLine">Chats, tabs, and <span>unsaved drafts</span></div>
+              <div class="proofLine"><span>Data &amp; Trust First.</span> AI Second.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">05</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">Day-one value</div>
+            <h2 class="headline full">A daily <span class="accent">Chief-of-Staff brief</span> from real behavior.</h2>
+            <div class="sub">What happened. Where time leaked. Who’s blocked. Insight appears <strong>without you ever having to explain a thing.</strong></div>
+          </div>
+          <div class="rightStage">
+            <div class="giant">1
+              <span class="tiny">brief, every day — grounded in actual workflow, not self-reporting.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">06</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">The origin</div>
+            <h2 class="headline full">We started as a staffing company with AI tools.</h2>
+            <div class="sub">Those tools worked so well, <strong>we’re now a data company with an AI staff.</strong></div>
+          </div>
+          <div class="rightStage">
+            <div class="stack">
+              <div class="lineCard">Service work created the workflow view.</div>
+              <div class="lineCard">The workflow view created the insight layer.</div>
+              <div class="lineCard">The insight layer now writes automation.</div>
+              <div class="lineCard muted">The moat was earned in operation, not imagined in a deck.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">07</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">The moat</div>
+            <h2 class="headline full">The moat is the <span class="accent">workflow data feed.</span></h2>
+            <div class="sub">The layer between the tools. The truth of how work actually happens. Defensible because it compounds with usage and sits where AI is blind.</div>
+          </div>
+          <div class="rightStage">
+            <div class="quote">AI only acts on what you hand it.<small>Go2 works from what people actually do.</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">08</div>
+        </div>
+        <div class="content">
+          <div class="eyebrow">The engine</div>
+          <h2 class="headline wide">The lean-startup loop, <span class="accent">run by AI.</span></h2>
+          <div class="sub">Observe. Explain. Write the skill. Gate approval. Deploy. Measure. Repeat.</div>
+          <div class="leftStage" style="min-height:320px;">
+            <div class="arrow"></div>
+            <div class="diagram">
+              <div class="node accentNode">Observe</div>
+              <div class="node">Insight</div>
+              <div class="node">Automate</div>
+              <div class="node">Approve</div>
+              <div class="node">Deploy</div>
+              <div class="node">Measure</div>
+              <div class="node accentNode">Repeat</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">09</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">Labor into software</div>
+            <h2 class="headline full">Recurring work becomes <span class="accent">maintained automation.</span></h2>
+            <div class="sub">Stable labor gets converted into software. The economic shift is direct: <strong>labor cost becomes software margin.</strong></div>
+          </div>
+          <div class="rightStage">
+            <div class="giant">→
+              <span class="tiny">from repeated human effort to reusable system behavior</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">10</div>
+        </div>
+        <div class="content">
+          <div class="eyebrow">Two value streams</div>
+          <h2 class="headline wide">Sell insight now.<br>Let automation <span class="accent">compound.</span></h2>
+          <div class="twoCols">
+            <div class="valueCol">
+              <div class="kicker">Stream one</div>
+              <div class="title">Workforce Intelligence</div>
+              <div class="desc">Daily operating truth from real behavior.</div>
+            </div>
+            <div class="valueCol">
+              <div class="kicker">Stream two</div>
+              <div class="title">Incremental Automation</div>
+              <div class="desc">Each approved skill expands the software base.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">11</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">Expansion</div>
+            <h2 class="headline full">Individuals to teams to the <span class="accent">workforce-intelligence layer.</span></h2>
+            <div class="sub">Start with personal workflow truth. Expand to team coordination. Become the operating layer above modern knowledge work.</div>
+          </div>
+          <div class="rightStage">
+            <div class="stack">
+              <div class="lineCard">Individuals</div>
+              <div class="lineCard">Teams</div>
+              <div class="lineCard"><span>Workforce intelligence</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">12</div>
+        </div>
+        <div class="content split">
+          <div>
+            <div class="eyebrow">The skeptic’s case</div>
+            <h2 class="headline full">The floor is strong <span class="accent">without the dream.</span></h2>
+            <div class="sub">Even before full automation, the product stands as workforce intelligence: better visibility, better prioritization, better management signal.</div>
+          </div>
+          <div class="rightStage">
+            <div class="proof">
+              <div class="proofLine">A live desktop product</div>
+              <div class="proofLine">Immediate day-one insight</div>
+              <div class="proofLine">Privacy posture is explicit</div>
+              <div class="proofLine">Automation is upside, not prerequisite</div>
+              <div class="proofLine"><span>Source-honest.</span> No invented scale story.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><strong>Go2 / Cowork.ai</strong> — Investor Deck</div>
+          <div class="slideNo">13</div>
+        </div>
+        <div class="content askWrap">
+          <div class="closing">
+            <div class="tag"><span class="dot"></span> The ask</div>
+            <h2 class="headline full">Back the company building the data layer between work and AI.</h2>
+            <div class="sub">Go2 / Cowork.ai makes progress visible, turns recurring labor into software, and compounds from the truth of workflow itself.</div>
+          </div>
+          <div class="rightStage">
+            <div class="quote">Disciplined.<br>Inevitable.<small>Built for a skeptical investor case — and much larger if the loop compounds as expected.</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="controls">
+    <div class="navGroup">
+      <button class="nav" id="prevBtn" aria-label="Previous slide">←</button>
+      <div class="counter" id="counter">01 / 13</div>
+      <button class="nav" id="nextBtn" aria-label="Next slide">→</button>
+    </div>
+    <div class="dotsWrap">
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dotsWrap = document.getElementById('dots');
+      const counter = document.getElementById('counter');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      let current = 0;
+
+      function pad(n){ return String(n).padStart(2,'0'); }
+
+      slides.forEach((_, i) => {
+        const b = document.createElement('button');
+        b.setAttribute('aria-label', 'Go to slide ' + (i+1));
+        b.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(b);
+      });
+
+      const dots = Array.from(dotsWrap.querySelectorAll('button'));
+
+      function goTo(index){
+        current = (index + slides.length) % slides.length;
+        slides.forEach((s, i) => s.classList.toggle('active', i === current));
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        counter.textContent = `${pad(current+1)} / ${pad(slides.length)}`;
+      }
+
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+
+      window.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){
+          e.preventDefault();
+          goTo(current + 1);
+        }
+        if(e.key === 'ArrowLeft' || e.key === 'PageUp'){
+          e.preventDefault();
+          goTo(current - 1);
+        }
+        if(e.key === 'Home') goTo(0);
+        if(e.key === 'End') goTo(slides.length - 1);
+      });
+
+      let touchStartX = 0;
+      let touchEndX = 0;
+      window.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].clientX, {passive:true});
+      window.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].clientX;
+        const dx = touchEndX - touchStartX;
+        if (Math.abs(dx) > 50) {
+          if (dx < 0) goTo(current + 1);
+          else goTo(current - 1);
+        }
+      }, {passive:true});
+
+      goTo(0);
+    })();
+  </script>
+</body>
+</html>

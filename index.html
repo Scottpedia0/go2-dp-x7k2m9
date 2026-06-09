@@ -20,7 +20,16 @@
   h1{font-size:30px;font-weight:800;letter-spacing:-.02em}
   .sub{color:var(--muted);margin-top:8px;font-size:15px;max-width:660px}
   .pill{display:inline-block;font-size:11px;font-weight:600;color:#9fd3a8;background:#16271a;border:1px solid #244a2c;border-radius:20px;padding:3px 10px;margin-top:12px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:34px}
+  .hero{margin-top:30px;background:linear-gradient(135deg,#10221c,#141925);border:1px solid #2f5a48;border-radius:16px;padding:30px}
+  .hero .k{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+  .hero .t{font-size:24px;font-weight:800;margin:8px 0 6px;letter-spacing:-.02em}
+  .hero .d{color:var(--muted);font-size:14.5px;max-width:560px}
+  .hero .btns{display:flex;gap:10px;margin-top:16px}
+  .hero .btn{padding:11px 22px;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none}
+  .primary{background:var(--accent);color:#06231a}
+  .ghost{background:#1b2233;border:1px solid var(--line);color:var(--text)}
+  h2.sec{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:40px 0 16px;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:11px;transition:.2s}
   .card:hover{border-color:#2f5a48;transform:translateY(-2px)}
   .rank{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
@@ -44,17 +53,25 @@
 <div id="app">
   <h1>Go2 / Cowork.ai — Investor Deck Preview</h1>
   <p class="sub">Working drafts, grounded in the live product (cowork.ai). Clean, minimal, one idea per slide. Every claim is sourced; install-scale and financial specifics are held for the source-of-record. Feedback very welcome.</p>
-  <span class="pill">grounded in the live product · clean redesign · draft</span>
+  <span class="pill">grounded in the live product · clean · draft</span>
 
-  <div class="grid">
-    <div class="card"><div class="rank">Product</div><div class="ttl">Stop feeling busy. Start making progress.</div><div class="desc">The product itself — the desktop agent that watches the real, invisible work and returns insight automatically. Lead with what it feels like.</div><div class="btns"><a class="btn" href="decks/r-product-gpt.html">A</a><a class="btn" href="decks/r-product-gemini.html">B</a></div></div>
-    <div class="card"><div class="rank">Origin</div><div class="ttl">A staffing company that became a data company</div><div class="desc">The true arc — the AI tools worked so well we became the data layer underneath them. Why the workflow-data moat is already earned.</div><div class="btns"><a class="btn" href="decks/r-origin-gpt.html">A</a><a class="btn" href="decks/r-origin-gemini.html">B</a></div></div>
-    <div class="card"><div class="rank">Moat</div><div class="ttl">The work between the tools</div><div class="desc">Chats, tabs, unsaved drafts — the real work no AI sees. Go2 is the only layer capturing it. The defensible feed.</div><div class="btns"><a class="btn" href="decks/r-between-gpt.html">A</a><a class="btn" href="decks/r-between-gemini.html">B</a></div></div>
-    <div class="card"><div class="rank">Engine</div><div class="ttl">AI that runs the loop</div><div class="desc">Observe → insight → automation → approve → deploy → measure → repeat. The lean-startup loop run by AI. Labor cost into software margin.</div><div class="btns"><a class="btn" href="decks/r-loop-gpt.html">Open ›</a></div></div>
-    <div class="card"><div class="rank">Return case</div><div class="ttl">The floor, not the dream</div><div class="desc">For a skeptic — the data moat, two value streams (intelligence now, automation compounding), individual-to-teams expansion. Source-honest.</div><div class="btns"><a class="btn" href="decks/r-return-gpt.html">A</a><a class="btn" href="decks/r-return-gemini.html">B</a></div></div>
+  <div class="hero">
+    <div class="k">★ The deck — recommended</div>
+    <div class="t">Stop feeling busy. Start making progress.</div>
+    <div class="d">The full 15-slide arc: the product, the invisible work, the staffing→data origin, the workflow-data moat, the compounding loop, and the disciplined return case. The single strongest version.</div>
+    <div class="btns"><a class="btn primary" href="decks/master-gpt.html">Open the deck ›</a><a class="btn ghost" href="decks/master-gemini.html">Alt design</a></div>
   </div>
 
-  <p class="fb">Open any deck and use ← / → to present. Tell us which direction lands and we'll converge on the one.</p>
+  <h2 class="sec">Or explore the angles</h2>
+  <div class="grid">
+    <div class="card"><div class="rank">Product</div><div class="ttl">Stop feeling busy</div><div class="desc">The product itself — the agent watching the real, invisible work, returning insight automatically.</div><div class="btns"><a class="btn" href="decks/r-product-gpt.html">A</a><a class="btn" href="decks/r-product-gemini.html">B</a></div></div>
+    <div class="card"><div class="rank">Origin</div><div class="ttl">Staffing → data company</div><div class="desc">The AI tools worked so well we became the data layer underneath them. The moat is already earned.</div><div class="btns"><a class="btn" href="decks/r-origin-gpt.html">A</a><a class="btn" href="decks/r-origin-gemini.html">B</a></div></div>
+    <div class="card"><div class="rank">Moat</div><div class="ttl">The work between the tools</div><div class="desc">Chats, tabs, unsaved drafts — the real work no AI sees. The defensible feed.</div><div class="btns"><a class="btn" href="decks/r-between-gpt.html">A</a><a class="btn" href="decks/r-between-gemini.html">B</a></div></div>
+    <div class="card"><div class="rank">Engine</div><div class="ttl">AI that runs the loop</div><div class="desc">Observe → automate → measure → repeat. Labor cost into software margin.</div><div class="btns"><a class="btn" href="decks/r-loop-gpt.html">Open ›</a></div></div>
+    <div class="card"><div class="rank">Return case</div><div class="ttl">The floor, not the dream</div><div class="desc">For a skeptic — the data moat, two value streams, individual-to-teams expansion. Source-honest.</div><div class="btns"><a class="btn" href="decks/r-return-gpt.html">A</a><a class="btn" href="decks/r-return-gemini.html">B</a></div></div>
+  </div>
+
+  <p class="fb">Open any deck and use ← / → to present. Tell us which direction lands and we'll tighten it slide by slide.</p>
 </div>
 
 <script>
