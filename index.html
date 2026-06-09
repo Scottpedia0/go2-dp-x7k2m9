@@ -42,15 +42,7 @@
 </style>
 </head>
 <body>
-<div id="gate"><div class="box">
-  <h2>Go2 / Cowork.ai — Deck Preview</h2>
-  <p>Private preview. Enter the password to view.</p>
-  <input id="pw" type="password" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')check()">
-  <button id="go" onclick="check()">View decks</button>
-  <div id="err"></div>
-</div></div>
-
-<div id="app">
+<div id="app" style="display:block">
   <h1>Go2 / Cowork.ai — Investor Deck Preview</h1>
   <p class="sub">Working drafts, grounded in the live product (cowork.ai). Clean, minimal, one idea per slide. Every claim is sourced; install-scale and financial specifics are held for the source-of-record. Feedback very welcome.</p>
   <span class="pill">grounded in the live product · clean · draft</span>
@@ -71,14 +63,8 @@
     <div class="card"><div class="rank">Return case</div><div class="ttl">The floor, not the dream</div><div class="desc">For a skeptic — the data moat, two value streams, individual-to-teams expansion. Source-honest.</div><div class="btns"><a class="btn" href="decks/r-return-gpt.html">A</a><a class="btn" href="decks/r-return-gemini.html">B</a></div></div>
   </div>
 
-  <p class="fb">Open any deck and use ← / → to present. Tell us which direction lands and we'll tighten it slide by slide.</p>
+  <p class="fb">Open any deck and use ← / → to move through slides. This page is a living draft — we'll keep adding and improving. Tell us which direction lands and what feels off.</p>
 </div>
 
-<script>
-  const PW="go2-preview-2026";
-  function check(){if(document.getElementById('pw').value.trim()===PW){sessionStorage.setItem('go2ok','1');reveal();}else{document.getElementById('err').textContent='Incorrect password.';}}
-  function reveal(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';}
-  if(sessionStorage.getItem('go2ok')==='1')reveal();else setTimeout(()=>document.getElementById('pw').focus(),50);
-</script>
 </body>
 </html>
