@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go2 | cowork.ai Investor Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #030303;
+            --bg-glow: #13131f;
+            --text-primary: #ffffff;
+            --text-secondary: #888894;
+            --accent-start: #38bdf8;
+            --accent-end: #818cf8;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --nav-hover: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            background-image: radial-gradient(circle at 50% 0%, var(--bg-glow) 0%, var(--bg-base) 70%);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .accent-text {
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .deck {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(2vh);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 10vw;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: clamp(3.5rem, 6vw, 7rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            margin-bottom: 2rem;
+        }
+
+        h1.quote {
+            font-size: clamp(2.5rem, 5vw, 5.5rem);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        h1.quote span {
+            color: var(--text-primary);
+        }
+
+        p.body-text {
+            font-size: clamp(1.25rem, 2vw, 2.25rem);
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            max-width: 800px;
+            letter-spacing: -0.01em;
+        }
+
+        .loop-visual {
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 3rem 0;
+            color: var(--text-primary);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .loop-visual span {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-start);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        /* Navigation Controls */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            background: var(--nav-bg);
+            padding: 12px 24px;
+            border-radius: 100px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        .btn-nav {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav:hover {
+            background: var(--nav-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-nav svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            opacity: 1;
+            background: var(--accent-start);
+            transform: scale(1.5);
+        }
+
+        .counter {
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                bottom: 20px;
+                padding: 8px 16px;
+                gap: 16px;
+            }
+            .counter {
+                bottom: 30px;
+                right: 30px;
+            }
+            .slide {
+                padding: 8vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="deck">
+        
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="tag">cowork.ai / by Go2</div>
+                <h1>Stop feeling busy.<br><span class="accent-text">Start making progress.</span></h1>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="quote">"The nine hours I spent in ChatGPT today <span>saved me so much time.</span>"</h1>
+                <p class="body-text">The illusion of productivity.</p>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>AI only works on what you <span class="accent-text">hand it.</span></h1>
+                <p class="body-text">But the real work is invisible. It happens in the gaps—across chats, browser tabs, and unsaved drafts.</p>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="tag">The Origin</div>
+                <h1>"We started as a staffing company with AI tools."</h1>
+                <p class="body-text">"Those tools worked so well, we're now a data company with an AI staff."</p>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>Enter <span class="accent-text">cowork.ai</span></h1>
+                <p class="body-text">A lightweight desktop app that privately analyzes your workflow to reveal actionable productivity insights. No prompts. No guesswork. Just results.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>It captures the <span class="accent-text">truth.</span></h1>
+                <p class="body-text">App usage. System metrics. The invisible work. Structured automatically, without you ever having to explain a thing.</p>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>Data & Trust First.<br><span class="accent-text">AI Second.</span></h1>
+                <p class="body-text">Private, secure, and running quietly in the background.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="tag">Day-One Value</div>
+                <h1>Workforce Intelligence</h1>
+                <p class="body-text">A daily "Chief of Staff" brief generated from real behavior. See what happened, who is blocked, and where time leaked.</p>
+            </div>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="tag">Compounding Value</div>
+                <h1>Incremental Automation</h1>
+                <div class="loop-visual">
+                    Capture <span>→</span> Insight <span>→</span> Skill <span>→</span> Deploy <span>→</span> Measure
+                </div>
+                <p class="body-text">The lean-startup loop, run by AI. Turning recurring work into maintained automation.</p>
+            </div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="tag">The Moat</div>
+                <h1>The Workflow<br><span class="accent-text">Data Feed</span></h1>
+                <p class="body-text">The granular truth of how work actually happens. The missing layer between your tools.</p>
+            </div>
+        </div>
+
+        <!-- Slide 11 -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="tag">The Thesis</div>
+                <h1>Labor <span class="accent-text">→</span> Software</h1>
+                <p class="body-text">Turn labor cost into software margin.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI Controls -->
+    <div class="controls">
+        <button class="btn-nav" id="prevBtn" aria-label="Previous Slide">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <div class="dots" id="dotsContainer"></div>
+        <button class="btn-nav" id="nextBtn" aria-label="Next Slide">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+    </div>
+    
+    <div class="counter" id="slideCounter">01 / 11</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const dotsContainer = document.getElementById('dotsContainer');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const counter = document.getElementById('slideCounter');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            // Initialize dots
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(index));
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = document.querySelectorAll('.dot');
+
+            function updateUI() {
+                // Update slides
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update dots
+                dots.forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+
+                // Update counter
+                const displayNum = (currentSlide + 1).toString().padStart(2, '0');
+                const totalNum = totalSlides.toString().padStart(2, '0');
+                counter.textContent = `${displayNum} / ${totalNum}`;
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateUI();
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateUI();
+                }
+            }
+
+            function goToSlide(index) {
+                currentSlide = index;
+                updateUI();
+            }
+
+            // Event Listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Initial UI update
+            updateUI();
+        });
+    </script>
+</body>
+</html>

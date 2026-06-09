@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Go2 — Deck Preview</title>
+<title>Go2 / Cowork.ai — Deck Preview</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0b0e14;--card:#141925;--line:#232a3a;--text:#e7ecf3;--muted:#8b97ad;--accent:#5b8cff;}
+  :root{--bg:#0b0e14;--card:#141925;--line:#232a3a;--text:#e7ecf3;--muted:#8b97ad;--accent:#34e2a3;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
   #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
@@ -14,27 +14,27 @@
   #gate h2{font-weight:800;font-size:22px;margin-bottom:6px}
   #gate p{color:var(--muted);font-size:14px;margin-bottom:18px}
   #pw{width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;text-align:center}
-  #go{margin-top:12px;width:100%;padding:12px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+  #go{margin-top:12px;width:100%;padding:12px;border-radius:9px;border:none;background:var(--accent);color:#06231a;font-weight:700;font-size:15px;cursor:pointer}
   #err{color:#ff7a7a;font-size:13px;margin-top:10px;height:16px}
   #app{display:none;max-width:1000px;margin:0 auto;padding:48px 26px 90px}
   h1{font-size:30px;font-weight:800;letter-spacing:-.02em}
-  .sub{color:var(--muted);margin-top:8px;font-size:15px;max-width:640px}
+  .sub{color:var(--muted);margin-top:8px;font-size:15px;max-width:660px}
   .pill{display:inline-block;font-size:11px;font-weight:600;color:#9fd3a8;background:#16271a;border:1px solid #244a2c;border-radius:20px;padding:3px 10px;margin-top:12px}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:34px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:11px;transition:.2s}
-  .card:hover{border-color:#33405c;transform:translateY(-2px)}
+  .card:hover{border-color:#2f5a48;transform:translateY(-2px)}
   .rank{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
   .ttl{font-size:18px;font-weight:700}
   .desc{color:var(--muted);font-size:14px;flex:1}
   .btns{display:flex;gap:9px;margin-top:4px}
   .btn{flex:1;text-align:center;padding:10px 0;border-radius:9px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid var(--line);color:var(--text);background:#1b2233}
-  .btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn:hover{background:var(--accent);border-color:var(--accent);color:#06231a}
   .fb{margin-top:42px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:22px}
 </style>
 </head>
 <body>
 <div id="gate"><div class="box">
-  <h2>Go2 — Deck Preview</h2>
+  <h2>Go2 / Cowork.ai — Deck Preview</h2>
   <p>Private preview. Enter the password to view.</p>
   <input id="pw" type="password" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')check()">
   <button id="go" onclick="check()">View decks</button>
@@ -42,19 +42,19 @@
 </div></div>
 
 <div id="app">
-  <h1>Go2 — Investor Deck Preview</h1>
-  <p class="sub">Early working drafts. Clean, minimal, investor-grade — one idea per slide. Every claim is sourced from our own materials; financials and customer specifics are held as placeholders for the source-of-record. Feedback very welcome.</p>
-  <span class="pill">source-checked · clean redesign · draft</span>
+  <h1>Go2 / Cowork.ai — Investor Deck Preview</h1>
+  <p class="sub">Working drafts, grounded in the live product (cowork.ai). Clean, minimal, one idea per slide. Every claim is sourced; install-scale and financial specifics are held for the source-of-record. Feedback very welcome.</p>
+  <span class="pill">grounded in the live product · clean redesign · draft</span>
 
   <div class="grid">
-    <div class="card"><div class="rank">#1 · Return case</div><div class="ttl">Investor-ROI: the floor, not the dream</div><div class="desc">Strip the AI narrative; underwrite the return on unit economics. Built to pre-empt a skeptic.</div><div class="btns"><a class="btn" href="decks/take-12-gpt.html">Open ›</a></div></div>
-    <div class="card"><div class="rank">#2 · Transparency</div><div class="ttl">The disciplined read</div><div class="desc">Every claim labeled by provenance — refuses to print a number the docs don't support. Hands the skeptic the gaps first.</div><div class="btns"><a class="btn" href="decks/take-09-gpt.html">A</a><a class="btn" href="decks/take-09-gemini.html">B</a></div></div>
-    <div class="card"><div class="rank">#3 · Proof</div><div class="ttl">One engagement, start to finish</div><div class="desc">A single audit run end-to-end — before, installed, measured, built, worth. If the before/after holds, the rest is repetition.</div><div class="btns"><a class="btn" href="decks/take-24-gpt.html">A</a><a class="btn" href="decks/take-24-gemini.html">B</a></div></div>
-    <div class="card"><div class="rank">#4 · GTM</div><div class="ttl">The audit is the funnel</div><div class="desc">Audit → report → retainer; each stage cheap, runs on the prospect's own data, earns the next. A provable funnel.</div><div class="btns"><a class="btn" href="decks/take-04-gpt.html">A</a><a class="btn" href="decks/take-04-gemini.html">B</a></div></div>
-    <div class="card"><div class="rank">#5 · Speed</div><div class="ttl">Install → implemented in two weeks</div><div class="desc">The wedge is speed — value on a clock measured in days, not a quarter of consulting.</div><div class="btns"><a class="btn" href="decks/take-11-gpt.html">Open ›</a></div></div>
+    <div class="card"><div class="rank">Product</div><div class="ttl">Stop feeling busy. Start making progress.</div><div class="desc">The product itself — the desktop agent that watches the real, invisible work and returns insight automatically. Lead with what it feels like.</div><div class="btns"><a class="btn" href="decks/r-product-gpt.html">A</a><a class="btn" href="decks/r-product-gemini.html">B</a></div></div>
+    <div class="card"><div class="rank">Origin</div><div class="ttl">A staffing company that became a data company</div><div class="desc">The true arc — the AI tools worked so well we became the data layer underneath them. Why the workflow-data moat is already earned.</div><div class="btns"><a class="btn" href="decks/r-origin-gpt.html">A</a><a class="btn" href="decks/r-origin-gemini.html">B</a></div></div>
+    <div class="card"><div class="rank">Moat</div><div class="ttl">The work between the tools</div><div class="desc">Chats, tabs, unsaved drafts — the real work no AI sees. Go2 is the only layer capturing it. The defensible feed.</div><div class="btns"><a class="btn" href="decks/r-between-gpt.html">A</a><a class="btn" href="decks/r-between-gemini.html">B</a></div></div>
+    <div class="card"><div class="rank">Engine</div><div class="ttl">AI that runs the loop</div><div class="desc">Observe → insight → automation → approve → deploy → measure → repeat. The lean-startup loop run by AI. Labor cost into software margin.</div><div class="btns"><a class="btn" href="decks/r-loop-gpt.html">Open ›</a></div></div>
+    <div class="card"><div class="rank">Return case</div><div class="ttl">The floor, not the dream</div><div class="desc">For a skeptic — the data moat, two value streams (intelligence now, automation compounding), individual-to-teams expansion. Source-honest.</div><div class="btns"><a class="btn" href="decks/r-return-gpt.html">A</a><a class="btn" href="decks/r-return-gemini.html">B</a></div></div>
   </div>
 
-  <p class="fb">Open any deck and use ← / → to present. Tell us which direction lands — we'll converge on the one.</p>
+  <p class="fb">Open any deck and use ← / → to present. Tell us which direction lands and we'll converge on the one.</p>
 </div>
 
 <script>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GO2 / COWORK.AI — Investor Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#06070b;
+      --bg2:#0b0f17;
+      --panel:rgba(255,255,255,0.03);
+      --text:#f5f7fb;
+      --muted:#97a0b3;
+      --soft:#667086;
+      --line:rgba(255,255,255,0.08);
+      --accent:#6ee7b7;
+      --accent2:#34d399;
+      --shadow:0 20px 80px rgba(0,0,0,.35);
+      --radius:28px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      height:100%;
+      background:radial-gradient(1200px 800px at 80% -10%, rgba(110,231,183,.10), transparent 50%),
+                 radial-gradient(900px 700px at 0% 100%, rgba(110,231,183,.07), transparent 50%),
+                 linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--text);
+      font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      overflow:hidden;
+    }
+    .deck{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
+    }
+    .slide{
+      position:absolute;
+      inset:0;
+      padding:7vh 7vw 9vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      opacity:0;
+      transform:translateX(40px) scale(.985);
+      pointer-events:none;
+      transition:opacity .5s ease, transform .5s ease;
+    }
+    .slide.active{
+      opacity:1;
+      transform:translateX(0) scale(1);
+      pointer-events:auto;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      letter-spacing:.02em;
+    }
+    .mark{
+      width:14px;height:14px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 0 40px rgba(110,231,183,.45);
+      flex:0 0 auto;
+    }
+    .brand .name{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+    .slide-num{
+      font-size:13px;
+      color:var(--soft);
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .content{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+    }
+    .content.left{justify-content:flex-start}
+    .stack{
+      width:min(1180px,100%);
+    }
+    .kicker{
+      color:var(--accent);
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size:14px;
+      margin-bottom:18px;
+    }
+    h1,h2,h3,p{margin:0}
+    .hero{
+      font-size:clamp(42px,8vw,104px);
+      line-height:.94;
+      letter-spacing:-.05em;
+      font-weight:900;
+      max-width:1100px;
+    }
+    .hero.medium{font-size:clamp(40px,6.7vw,84px)}
+    .hero.small{font-size:clamp(34px,5.4vw,68px)}
+    .sub{
+      margin-top:26px;
+      max-width:840px;
+      font-size:clamp(18px,2.1vw,30px);
+      line-height:1.22;
+      color:var(--muted);
+      font-weight:500;
+      letter-spacing:-.03em;
+    }
+    .sub strong{color:var(--text); font-weight:800}
+    .accent{color:var(--accent)}
+    .quote{
+      font-size:clamp(28px,4.8vw,62px);
+      line-height:1.02;
+      letter-spacing:-.045em;
+      font-weight:800;
+      max-width:1080px;
+    }
+    .quote-mark{
+      color:var(--accent);
+      font-size:1.1em;
+    }
+
+    .big-number{
+      font-size:clamp(96px,20vw,280px);
+      line-height:.88;
+      letter-spacing:-.08em;
+      font-weight:900;
+      color:var(--text);
+    }
+    .number-label{
+      margin-top:18px;
+      font-size:clamp(22px,3vw,36px);
+      color:var(--muted);
+      max-width:760px;
+      line-height:1.12;
+      letter-spacing:-.03em;
+      font-weight:600;
+    }
+
+    .loop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      width:100%;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .loop-step{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      white-space:nowrap;
+      font-size:clamp(18px,2.1vw,28px);
+      font-weight:800;
+      letter-spacing:-.03em;
+      color:var(--text);
+    }
+    .loop-step .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 24px rgba(110,231,183,.45);
+      flex:0 0 auto;
+    }
+    .arrow{
+      color:rgba(255,255,255,.22);
+      font-size:clamp(24px,3vw,40px);
+      font-weight:700;
+      transform:translateY(-1px);
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px 30px;
+      backdrop-filter: blur(8px);
+    }
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:24px;
+      width:100%;
+      margin-top:28px;
+    }
+    .panel h3{
+      font-size:clamp(24px,2.5vw,34px);
+      letter-spacing:-.04em;
+      line-height:1;
+      margin-bottom:12px;
+      font-weight:800;
+    }
+    .panel p{
+      font-size:clamp(18px,1.6vw,24px);
+      line-height:1.18;
+      color:var(--muted);
+      letter-spacing:-.03em;
+      font-weight:500;
+      max-width:32ch;
+    }
+
+    .center{
+      text-align:center;
+      margin-inline:auto;
+    }
+
+    .footer{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      margin-top:20px;
+    }
+    .dots{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .dot-nav{
+      width:10px;height:10px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+      transition:all .25s ease;
+      cursor:pointer;
+    }
+    .dot-nav.active{
+      width:30px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 32px rgba(110,231,183,.35);
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    button.nav{
+      appearance:none;
+      border:none;
+      outline:none;
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.08);
+      width:52px;height:52px;border-radius:999px;
+      display:grid;place-items:center;
+      font-size:22px;font-weight:700;
+      cursor:pointer;
+      transition:transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    button.nav:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.08);
+      border-color:rgba(255,255,255,.14);
+    }
+
+    .micro{
+      font-size:clamp(18px,2vw,28px);
+      color:var(--muted);
+      line-height:1.2;
+      letter-spacing:-.03em;
+      max-width:980px;
+      margin-top:22px;
+      font-weight:500;
+    }
+    .em{
+      color:var(--text);
+      font-weight:800;
+    }
+
+    .diagram{
+      width:100%;
+      margin-top:34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      padding:16px 20px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      font-size:clamp(18px,2vw,26px);
+      font-weight:800;
+      letter-spacing:-.03em;
+      color:var(--text);
+    }
+    .pill.accent{
+      color:#03120d;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border-color:transparent;
+      box-shadow:0 16px 50px rgba(110,231,183,.22);
+    }
+
+    .bottom-note{
+      color:var(--soft);
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:700;
+    }
+
+    @media (max-width: 900px){
+      .slide{padding:5.5vh 6vw 11vh}
+      .two-col{grid-template-columns:1fr}
+      .footer{align-items:flex-end}
+      .loop{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <section class="slide active">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">01</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Workflow intelligence</div>
+          <h1 class="hero">AI that runs the loop.</h1>
+          <p class="sub">Observe <strong>→</strong> insight <strong>→</strong> automation <strong>→</strong> approve <strong>→</strong> deploy <strong>→</strong> measure <strong>→</strong> repeat.</p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">02</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">The tension</div>
+          <div class="quote"><span class="quote-mark">“</span>The nine hours I spent in ChatGPT today saved me so much time.<span class="quote-mark">”</span></div>
+          <p class="sub">People feel productive while making <strong>no real progress.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">03</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Live product</div>
+          <h1 class="hero medium">A desktop app that privately analyzes workflow.</h1>
+          <p class="sub">No prompts. No guesswork. <strong>Just results.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">04</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">What it sees</div>
+          <h1 class="hero small">Chats. Tabs. Apps. Unsaved drafts.</h1>
+          <p class="sub">Cowork.ai structures tiny daily interactions into <strong>meaningful insight</strong> — without you ever having to explain a thing.</p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">05</div>
+      </div>
+      <div class="content center">
+        <div class="stack center">
+          <div class="kicker">Principle</div>
+          <div class="big-number">Data &amp; Trust First.</div>
+          <div class="number-label center">AI second.</div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">06</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Origin</div>
+          <h1 class="hero small">We started as a staffing company with AI tools.</h1>
+          <p class="sub">Those tools worked so well, we’re now a <strong>data company with an AI staff.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">07</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Plain English</div>
+          <h1 class="hero medium">Go2 observes how work actually happens.</h1>
+          <p class="sub">It explains where value leaks, then turns stable recurring work into <strong>maintained automation.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">08</div>
+      </div>
+      <div class="content center">
+        <div class="stack center">
+          <div class="kicker">The engine</div>
+          <h1 class="hero medium">The lean-startup loop — run by AI.</h1>
+          <div class="diagram">
+            <div class="pill">Capture</div>
+            <div class="arrow">→</div>
+            <div class="pill">Insight</div>
+            <div class="arrow">→</div>
+            <div class="pill">Write skill</div>
+            <div class="arrow">→</div>
+            <div class="pill">Approve</div>
+            <div class="arrow">→</div>
+            <div class="pill">Deploy</div>
+            <div class="arrow">→</div>
+            <div class="pill">Measure</div>
+            <div class="arrow">→</div>
+            <div class="pill accent">Repeat</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">09</div>
+      </div>
+      <div class="content center">
+        <div class="stack center">
+          <div class="kicker">Compounding</div>
+          <div class="big-number">Weekly</div>
+          <div class="number-label center">The human sets the goal. The system improves the work one small step at a time.</div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">10</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Value stream one</div>
+          <h1 class="hero medium">Day-one workforce intelligence.</h1>
+          <p class="sub">A daily <strong>Chief of Staff brief</strong> from real behavior: what happened, who’s blocked, where time leaked.</p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">11</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Value stream two</div>
+          <h1 class="hero medium">Incremental automation that keeps working.</h1>
+          <p class="sub">The loop turns recurring work into <strong>maintained software.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">12</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Why this wins</div>
+          <h1 class="hero small">The moat is the workflow data feed.</h1>
+          <p class="sub">The granular truth of how work actually happens — <strong>the layer between the tools.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">13</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Contrast</div>
+          <h1 class="hero small">AI tools work on what you hand them.</h1>
+          <p class="sub">Go2 works from <strong>what people actually do.</strong></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">14</div>
+      </div>
+      <div class="content center">
+        <div class="stack center">
+          <div class="kicker">Business thesis</div>
+          <div class="big-number">Labor cost</div>
+          <div class="number-label center">converted into <span class="em">software margin.</span></div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">15</div>
+      </div>
+      <div class="content left">
+        <div class="stack">
+          <div class="kicker">Market shape</div>
+          <div class="two-col">
+            <div class="panel">
+              <h3>For Individuals</h3>
+              <p>Stop feeling busy. Start making progress.</p>
+            </div>
+            <div class="panel">
+              <h3>For Teams</h3>
+              <p>See patterns, surface blockers, improve the system of work.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand"><div class="mark"></div><div class="name">GO2 / COWORK.AI</div></div>
+        <div class="slide-num">16</div>
+      </div>
+      <div class="content center">
+        <div class="stack center">
+          <div class="kicker">Closing</div>
+          <h1 class="hero medium">From AI assistant<br>to AI-operated improvement system.</h1>
+          <p class="micro center">Not just helping with tasks. <span class="em">Running the compounding loop.</span></p>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="dots"></div>
+        <div class="controls">
+          <button class="nav prev" aria-label="Previous slide">←</button>
+          <button class="nav next" aria-label="Next slide">→</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    (function(){
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      let current = 0;
+
+      function renderDots(){
+        slides.forEach((slide, i) => {
+          slide.querySelectorAll('.dots').forEach(d => d.innerHTML = '');
+          const dotsWrap = slide.querySelector('.dots');
+          slides.forEach((_, idx) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot-nav' + (idx === current ? ' active' : '');
+            dot.setAttribute('aria-label', 'Go to slide ' + (idx + 1));
+            dot.addEventListener('click', () => goTo(idx));
+            dotsWrap.appendChild(dot);
+          });
+        });
+      }
+
+      function update(){
+        slides.forEach((s,i)=>s.classList.toggle('active', i===current));
+        renderDots();
+      }
+
+      function goTo(index){
+        current = (index + slides.length) % slides.length;
+        update();
+      }
+
+      function next(){ goTo(current + 1); }
+      function prev(){ goTo(current - 1); }
+
+      document.querySelectorAll('.next').forEach(b => b.addEventListener('click', next));
+      document.querySelectorAll('.prev').forEach(b => b.addEventListener('click', prev));
+
+      window.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){
+          e.preventDefault(); next();
+        }
+        if(e.key === 'ArrowLeft' || e.key === 'PageUp'){
+          e.preventDefault(); prev();
+        }
+        if(e.key === 'Home') goTo(0);
+        if(e.key === 'End') goTo(slides.length - 1);
+      });
+
+      let startX = null;
+      window.addEventListener('touchstart', (e) => {
+        startX = e.changedTouches[0].clientX;
+      }, {passive:true});
+
+      window.addEventListener('touchend', (e) => {
+        if(startX == null) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        if(Math.abs(dx) > 50){
+          if(dx < 0) next();
+          else prev();
+        }
+        startX = null;
+      }, {passive:true});
+
+      update();
+    })();
+  </script>
+</body>
+</html>

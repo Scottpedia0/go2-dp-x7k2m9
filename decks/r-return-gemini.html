@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go2 / Cowork.ai - Investor Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #050505;
+            --bg-surface: #0a0a0a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent-color: #818cf8;
+            --accent-gradient: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --transition-speed: 0.6s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Ambient Background Glow */
+        .ambient-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60vw;
+            height: 60vh;
+            background: radial-gradient(circle, rgba(129, 140, 248, 0.05) 0%, rgba(5, 5, 5, 0) 70%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #deck {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease, visibility var(--transition-speed);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            text-align: left;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: clamp(3rem, 6vw, 6.5rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+
+        .accent-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p {
+            font-size: clamp(1.25rem, 2vw, 2rem);
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--text-muted);
+            max-width: 850px;
+        }
+
+        strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Specific Slide Layouts */
+        .center-text {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .center-text p {
+            text-align: center;
+        }
+
+        .loop-step {
+            display: inline-block;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+        
+        .loop-arrow {
+            color: var(--accent-color);
+            margin: 0 0.5rem;
+            font-weight: 800;
+        }
+
+        /* Navigation Controls */
+        .controls {
+            position: absolute;
+            bottom: 2rem;
+            left: 0;
+            width: 100%;
+            padding: 0 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .counter {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            width: 60px;
+        }
+
+        .dots {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #27272a;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: var(--text-main);
+            transform: scale(1.5);
+        }
+
+        .nav-arrows {
+            display: flex;
+            gap: 1rem;
+            width: 60px;
+            justify-content: flex-end;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            transform: translateX(2px);
+        }
+        
+        .nav-btn.prev:hover {
+            transform: translateX(-2px);
+        }
+
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+
+        @media (max-width: 768px) {
+            .slide { padding: 2rem; }
+            .controls { padding: 0 2rem; }
+            .counter, .nav-arrows { display: none; }
+            .dots { margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <div id="deck">
+        
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="content-wrapper center-text">
+                <h1>Stop feeling busy.<br><span class="accent-text">Start making progress.</span></h1>
+                <p>The disciplined return case for Cowork.ai.</p>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>The Origin Truth.</h1>
+                <p>"We started as a staffing company with AI tools. Those tools worked so well, we are now a <strong>data company with an AI staff</strong>."</p>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>The Illusion of Speed.</h1>
+                <p style="font-style: italic; color: var(--text-main); margin-bottom: 1rem;">"The 9 hours I spent in ChatGPT today saved me so much time."</p>
+                <p>Current AI requires prompts. People feel highly productive while making absolutely no real progress.</p>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1><span class="accent-text">Truth</span>, not prompts.</h1>
+                <p>Cowork.ai is a lightweight desktop app that privately analyzes your actual workflow to reveal actionable insights. <strong>Automatically. No guesswork.</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>The Data Moat.</h1>
+                <p>AI tools only work on what you hand them. We capture the granular truth of how work actually happens—the invisible layer between the tools.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>Two Value Streams.</h1>
+                <p style="margin-bottom: 1rem;"><strong>1. Intelligence Now:</strong> Daily visibility into blocks and time leaks.</p>
+                <p><strong>2. Automation Compounding:</strong> Turning recurring work into maintained software.</p>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>The Compounding Loop.</h1>
+                <p style="font-size: clamp(1rem, 1.5vw, 1.5rem);">
+                    <span class="loop-step">Capture behavior</span> <span class="loop-arrow">&rarr;</span> 
+                    <span class="loop-step">Generate insight</span> <span class="loop-arrow">&rarr;</span> 
+                    <span class="loop-step">Write automation</span> <span class="loop-arrow">&rarr;</span> 
+                    <span class="loop-step">Human approval</span> <span class="loop-arrow">&rarr;</span> 
+                    <span class="loop-step">Deploy</span>
+                </p>
+                <p style="margin-top: 2rem;">The lean startup build-measure-learn loop. But AI runs it. The system improves work one small step at a time.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>Individual to Teams.</h1>
+                <p>Start by making the individual undeniably efficient. Expand to detect team patterns and optimize the collective workflow.</p>
+            </div>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide">
+            <div class="content-wrapper center-text">
+                <h1>Data & Trust First.<br><span class="accent-text">AI Second.</span></h1>
+                <p>Secure capture. The human sets the goal; the system quietly structures daily interactions into meaning without explanation.</p>
+            </div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h1>Labor to Software.</h1>
+                <p>We observe where value leaks, and turn stable recurring human effort into high-margin automated execution. <strong>This is the floor.</strong></p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="counter"><span id="current-slide">01</span> / 10</div>
+        <div class="dots" id="dots-container"></div>
+        <div class="nav-arrows">
+            <button class="nav-btn prev" id="prev-btn" aria-label="Previous Slide">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="nav-btn next" id="next-btn" aria-label="Next Slide">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+            
+            const currentSlideEl = document.getElementById('current-slide');
+            const dotsContainer = document.getElementById('dots-container');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            // Initialize dots
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+            const dots = document.querySelectorAll('.dot');
+
+            function updateUI() {
+                // Update slides
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update counter
+                currentSlideEl.textContent = String(currentSlide + 1).padStart(2, '0');
+
+                // Update dots
+                dots.forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+
+                // Update button states
+                prevBtn.style.opacity = currentSlide === 0 ? '0.3' : '1';
+                prevBtn.style.cursor = currentSlide === 0 ? 'default' : 'pointer';
+                nextBtn.style.opacity = currentSlide === totalSlides - 1 ? '0.3' : '1';
+                nextBtn.style.cursor = currentSlide === totalSlides - 1 ? 'default' : 'pointer';
+            }
+
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    currentSlide = index;
+                    updateUI();
+                }
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateUI();
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateUI();
+                }
+            }
+
+            // Event Listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Initial setup
+            updateUI();
+        });
+    </script>
+</body>
+</html>
