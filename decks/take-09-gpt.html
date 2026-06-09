@@ -3,1001 +3,608 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Go2 — The Disciplined Read</title>
+  <title>Go2 — Disciplined Read</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b1020;
-      --panel:#0f172a;
-      --panel-2:#111827;
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --soft:#cbd5e1;
-      --line:rgba(255,255,255,0.09);
-      --accent:#22c55e;
-      --accent-2:#60a5fa;
-      --warn:#f59e0b;
-      --shadow:0 20px 60px rgba(0,0,0,0.35);
-      --radius:24px;
+      --bg:#0a0d12;
+      --bg2:#0f1420;
+      --panel:rgba(255,255,255,0.03);
+      --text:#f5f7fb;
+      --muted:#9aa4b2;
+      --soft:#697586;
+      --line:rgba(255,255,255,0.08);
+      --accent:#7c9cff;
+      --green:#35d07f;
+      --amber:#f4b74a;
+      --red:#ff7a7a;
+      --shadow:0 20px 80px rgba(0,0,0,.35);
     }
+
     *{box-sizing:border-box}
     html,body{
-      margin:0;height:100%;overflow:hidden;
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
       background:
-        radial-gradient(1200px 700px at 80% -10%, rgba(34,197,94,0.12), transparent 60%),
-        radial-gradient(900px 600px at 0% 100%, rgba(96,165,250,0.08), transparent 60%),
-        linear-gradient(180deg,#08101d 0%, #0b1020 100%);
+        radial-gradient(circle at 20% 20%, rgba(124,156,255,.12), transparent 30%),
+        radial-gradient(circle at 80% 15%, rgba(124,156,255,.08), transparent 26%),
+        linear-gradient(180deg,var(--bg),var(--bg2));
       color:var(--text);
-      font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      font-family:"Inter",system-ui,sans-serif;
     }
+
     .deck{
       position:relative;
-      width:100vw;height:100vh;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
     }
+
     .slides{
-      width:100%;height:100%;
-      position:relative;
+      display:flex;
+      width:100%;
+      height:100%;
+      transition:transform .65s cubic-bezier(.22,1,.36,1);
+      will-change:transform;
     }
+
     .slide{
-      position:absolute; inset:0;
-      padding:56px 72px 110px;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      opacity:0; transform:translateX(40px) scale(0.985);
-      transition:opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1);
-      pointer-events:none;
-    }
-    .slide.active{
-      opacity:1; transform:translateX(0) scale(1);
-      pointer-events:auto;
-    }
-    .slide.prev{
-      transform:translateX(-40px) scale(0.985);
+      position:relative;
+      flex:0 0 100%;
+      width:100%;
+      height:100%;
+      padding:7vh 7vw 11vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:2.2vh;
     }
 
-    .topbar{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:24px;
-      margin-bottom:18px;
-    }
-    .brand{
-      display:flex; flex-direction:column; gap:8px;
-    }
     .eyebrow{
+      font-size:13px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
       color:var(--accent);
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      font-size:12px;
       font-weight:700;
     }
+
+    h1,h2,p{margin:0}
+
     .title{
-      font-size:clamp(34px,5vw,62px);
-      line-height:1.02;
-      letter-spacing:-0.04em;
-      font-weight:800;
-      max-width:1100px;
+      font-size:clamp(42px, 7vw, 110px);
+      line-height:.94;
+      letter-spacing:-.05em;
+      font-weight:900;
+      max-width:11ch;
     }
-    .subtitle{
-      margin-top:14px;
-      color:var(--soft);
-      font-size:clamp(16px,2vw,24px);
-      line-height:1.35;
-      max-width:980px;
-    }
-    .sectionno{
+
+    .title.wide{max-width:13ch}
+    .title.xwide{max-width:15ch}
+
+    .sub{
+      font-size:clamp(18px, 2.1vw, 30px);
+      line-height:1.28;
       color:var(--muted);
-      font-weight:700;
-      font-size:14px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      white-space:nowrap;
-      padding-top:6px;
+      font-weight:500;
+      max-width:28ch;
     }
 
-    .content{
-      display:grid;
-      gap:26px;
-      align-content:start;
-      min-height:0;
-    }
-    .content.two-col{
-      grid-template-columns:1.1fr .9fr;
-      gap:28px;
-    }
-    .content.equal{
-      grid-template-columns:1fr 1fr;
+    .kicker{
+      font-size:clamp(20px, 2.4vw, 34px);
+      line-height:1.18;
+      color:var(--text);
+      font-weight:700;
+      max-width:22ch;
     }
 
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:26px 28px;
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(8px);
+    .big-number{
+      font-size:clamp(72px, 16vw, 220px);
+      line-height:.88;
+      letter-spacing:-.07em;
+      font-weight:900;
+      color:var(--text);
+      margin:.02em 0;
     }
-    .card h3{
-      margin:0 0 12px;
-      font-size:18px;
-      line-height:1.2;
-      color:#fff;
-      letter-spacing:-0.02em;
+
+    .big-number.small{
+      font-size:clamp(58px, 12vw, 160px);
     }
-    .big-quote{
-      font-size:clamp(24px,3.3vw,40px);
-      line-height:1.15;
-      letter-spacing:-0.03em;
+
+    .range{
+      display:flex;
+      align-items:flex-end;
+      gap:1vw;
+      flex-wrap:wrap;
+    }
+
+    .range .big-number{
+      font-size:clamp(56px, 10vw, 140px);
+    }
+
+    .suffix{
+      font-size:clamp(24px, 3vw, 44px);
+      line-height:1.05;
       font-weight:700;
-      max-width:1200px;
+      color:var(--muted);
+      margin-bottom:.28em;
     }
-    .body{
-      color:var(--soft);
-      font-size:18px;
-      line-height:1.55;
-      max-width:1100px;
-    }
-    .body strong{color:#fff}
-    .grid-2,.grid-3,.grid-4{
-      display:grid; gap:18px;
-    }
-    .grid-2{grid-template-columns:1fr 1fr}
-    .grid-3{grid-template-columns:repeat(3,1fr)}
-    .grid-4{grid-template-columns:repeat(4,1fr)}
-    .metric{
-      padding:22px;
-      border-radius:20px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,0.03);
-      min-height:132px;
-    }
-    .metric .k{
-      font-size:clamp(28px,3vw,42px);
-      line-height:1;
+
+    .statement{
+      font-size:clamp(32px,4.8vw,74px);
+      line-height:1.02;
+      letter-spacing:-.045em;
       font-weight:800;
-      letter-spacing:-0.04em;
-      color:#fff;
-      margin-bottom:10px;
+      max-width:13ch;
     }
-    .metric .l{
-      color:var(--soft);
-      font-size:15px;
-      line-height:1.4;
+
+    .quote{
+      font-size:clamp(34px,5.3vw,82px);
+      line-height:1.02;
+      letter-spacing:-.05em;
+      font-weight:900;
+      max-width:12ch;
     }
-    ul.clean{
-      margin:0; padding-left:20px;
-      color:var(--soft);
-      font-size:18px;
-      line-height:1.5;
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:1vh;
     }
-    ul.clean li{margin:10px 0}
-    .pillrow{
-      display:flex; gap:12px; flex-wrap:wrap;
-    }
-    .pill{
-      padding:10px 14px;
+
+    .chip{
+      padding:11px 16px;
       border:1px solid var(--line);
       border-radius:999px;
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .chip.green{color:var(--green); border-color:rgba(53,208,127,.28); background:rgba(53,208,127,.08)}
+    .chip.amber{color:var(--amber); border-color:rgba(244,183,74,.26); background:rgba(244,183,74,.08)}
+    .chip.red{color:var(--red); border-color:rgba(255,122,122,.24); background:rgba(255,122,122,.08)}
+    .chip.accent{color:#cbd7ff; border-color:rgba(124,156,255,.28); background:rgba(124,156,255,.08)}
+
+    .bottom-note{
+      position:absolute;
+      left:7vw;
+      bottom:11vh;
       font-size:14px;
       color:var(--soft);
-      background:rgba(255,255,255,0.03);
+      max-width:40ch;
+      line-height:1.35;
     }
-    .legend{
+
+    .split{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:16px;
-    }
-    .legend .card{
-      min-height:170px;
-    }
-    .tag{
-      display:inline-flex; align-items:center; gap:10px;
-      font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-      color:#fff;
-      margin-bottom:14px;
-    }
-    .dot{
-      width:11px; height:11px; border-radius:50%;
-      display:inline-block;
-    }
-    .green{background:var(--accent)}
-    .blue{background:var(--accent-2)}
-    .amber{background:var(--warn)}
-    .note{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.45;
+      grid-template-columns:1.1fr .9fr;
+      align-items:center;
+      gap:4vw;
     }
 
-    .footer{
-      display:flex; align-items:end; justify-content:space-between; gap:24px;
-      margin-top:18px;
-    }
-    .source{
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.5;
-      max-width:1080px;
+    .right-stat{
+      justify-self:end;
+      text-align:right;
     }
 
-    .controls{
-      position:fixed; left:24px; right:24px; bottom:20px; z-index:50;
-      display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:16px;
-    }
-    .nav{
-      display:flex; gap:10px; align-items:center;
-    }
-    button.ctrl{
-      appearance:none; border:none; outline:none; cursor:pointer;
-      color:#fff; background:rgba(255,255,255,0.08);
-      border:1px solid var(--line);
-      width:46px; height:46px; border-radius:14px;
-      font-size:18px; font-weight:700;
-      transition:transform .18s ease, background .18s ease, opacity .18s ease;
-      backdrop-filter: blur(8px);
-    }
-    button.ctrl:hover{transform:translateY(-1px); background:rgba(255,255,255,0.12)}
-    button.ctrl:disabled{opacity:.35; cursor:not-allowed; transform:none}
-    .progress-wrap{
-      display:flex; align-items:center; gap:16px; min-width:0;
-      background:rgba(8,16,29,0.62);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px 16px;
-      backdrop-filter: blur(10px);
-    }
-    .counter{
-      color:#fff; font-weight:700; font-size:14px; white-space:nowrap;
-      min-width:58px;
-    }
-    .dots{
-      display:flex; gap:8px; overflow:auto; scrollbar-width:none;
-    }
-    .dots::-webkit-scrollbar{display:none}
-    .dotbtn{
-      width:12px; height:12px; border-radius:999px; border:none; cursor:pointer;
-      background:rgba(255,255,255,0.18);
-      transition:all .18s ease;
-      flex:0 0 auto;
-    }
-    .dotbtn.active{
-      width:30px; background:var(--accent);
-    }
-    .hint{
-      color:var(--muted); font-size:13px; white-space:nowrap;
-    }
-
-    .divider{
-      height:1px; background:var(--line); margin:8px 0 2px;
-    }
-
-    .process{
-      display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
-    }
-    .step{
-      position:relative;
-      padding:18px 18px 18px 20px;
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:rgba(255,255,255,0.03);
-      min-height:134px;
-    }
-    .step .n{
-      font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); font-weight:700; margin-bottom:10px;
-    }
-    .step .t{
-      font-size:18px; font-weight:700; color:#fff; margin-bottom:8px;
-    }
-    .step .d{
-      color:var(--soft); font-size:15px; line-height:1.45;
-    }
-
-    .price-stack{
-      display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
-    }
-    .price{
-      border:1px solid var(--line);
-      border-radius:20px;
-      padding:22px;
-      background:rgba(255,255,255,0.03);
-    }
-    .price .tier{
-      color:var(--accent);
-      font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-      margin-bottom:12px;
-    }
-    .price .amt{
-      font-size:24px; font-weight:800; color:#fff; line-height:1.1; letter-spacing:-0.03em;
-      margin-bottom:8px;
-    }
-    .price .desc{
-      color:var(--soft); font-size:15px; line-height:1.45;
-    }
-
-    .source-list{
-      columns:2;
-      column-gap:28px;
-      color:var(--soft);
+    .right-stat .label{
       font-size:15px;
-      line-height:1.5;
-    }
-    .source-list p{
-      break-inside:avoid;
-      margin:0 0 14px;
+      color:var(--soft);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-weight:700;
+      margin-bottom:10px;
     }
 
-    @media (max-width: 1100px){
-      .slide{padding:38px 28px 108px}
-      .content.two-col,.content.equal,.grid-2,.grid-3,.grid-4,.legend,.process,.price-stack{grid-template-columns:1fr}
-      .source-list{columns:1}
-      .title{max-width:none}
-      .subtitle,.body,.source{max-width:none}
+    .mini{
+      font-size:clamp(18px,2vw,28px);
+      color:var(--muted);
+      line-height:1.24;
+      font-weight:600;
+      max-width:22ch;
     }
-    @media (max-width: 700px){
-      .topbar{flex-direction:column}
-      .controls{left:12px; right:12px; bottom:12px; grid-template-columns:1fr; gap:10px}
-      .progress-wrap{order:-1}
-      .hint{display:none}
-      .title{font-size:34px}
-      .subtitle{font-size:17px}
-      .body,ul.clean{font-size:16px}
-      .metric .k{font-size:28px}
+
+    .hero-line{
+      width:min(120px,18vw);
+      height:4px;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--accent),transparent);
+      margin:1vh 0 1.5vh;
+    }
+
+    .nav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:20;
+      pointer-events:none;
+      padding:0 24px 22px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+    }
+
+    .controls,.status{
+      pointer-events:auto;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .btn{
+      width:48px;
+      height:48px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition:.2s ease;
+      backdrop-filter: blur(10px);
+      box-shadow:var(--shadow);
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.08);
+      border-color:rgba(255,255,255,.14);
+    }
+
+    .counter{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:0 6px;
+    }
+
+    .dots{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      max-width:min(52vw, 720px);
+      justify-content:flex-end;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      transition:.25s ease;
+      cursor:pointer;
+    }
+
+    .dot.active{
+      width:30px;
+      background:var(--accent);
+    }
+
+    .progress{
+      position:fixed;
+      top:0;
+      left:0;
+      height:3px;
+      background:linear-gradient(90deg,var(--accent),#a9bbff);
+      z-index:30;
+      width:0%;
+      transition:width .45s ease;
+    }
+
+    .fade-up{
+      opacity:0;
+      transform:translateY(18px);
+      transition:opacity .55s ease, transform .55s ease;
+    }
+
+    .slide.active .fade-up{
+      opacity:1;
+      transform:none;
+    }
+
+    .slide.active .fade-up:nth-child(2){transition-delay:.06s}
+    .slide.active .fade-up:nth-child(3){transition-delay:.12s}
+    .slide.active .fade-up:nth-child(4){transition-delay:.18s}
+    .slide.active .fade-up:nth-child(5){transition-delay:.24s}
+
+    .accent{color:var(--accent)}
+    .green{color:var(--green)}
+    .muted{color:var(--muted)}
+    .soft{color:var(--soft)}
+
+    @media (max-width: 900px){
+      .slide{padding:7vh 7vw 14vh}
+      .split{grid-template-columns:1fr; gap:3vh}
+      .right-stat{justify-self:start; text-align:left}
+      .bottom-note{bottom:14vh; max-width:32ch}
+      .nav{padding:0 16px 16px}
+      .dots{max-width:48vw}
+      .btn{width:44px;height:44px}
     }
   </style>
 </head>
 <body>
+  <div class="progress" id="progress"></div>
+
   <div class="deck">
-    <div class="slides">
+    <div class="slides" id="slides">
 
       <section class="slide active">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">Go2</div>
-            <div class="title">The Disciplined Read</div>
-            <div class="subtitle">
-              Every claim is labeled by where it comes from. Every claim that is not yet proven is flagged as not-yet-proven. We will not put a number on a slide that our own documents do not support.
-            </div>
-          </div>
-          <div class="sectionno">Title</div>
-        </div>
-        <div class="content">
-          <div class="card">
-            <div class="big-quote">“We would rather underclaim and be right than pitch you something you have already learned to discount.”</div>
-            <div class="divider"></div>
-            <div class="body" style="margin-top:18px">
-              The business under the claims is real and has one delivered proof point — and that is what we are asking you to underwrite.
-            </div>
-          </div>
-          <div class="pillrow">
-            <div class="pill">Restrained by source</div>
-            <div class="pill">Single delivered proof point</div>
-            <div class="pill">No unsupported numbers</div>
-            <div class="pill">Skeptical-investor framing</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Thesis statement from the provided source content.</div>
+        <div class="eyebrow fade-up">Go2</div>
+        <div class="hero-line fade-up"></div>
+        <h1 class="title wide fade-up">Underclaim. Be right.</h1>
+        <p class="sub fade-up">One delivered proof point. Every claim labeled. Nothing inflated.</p>
+        <div class="chips fade-up">
+          <span class="chip green">Green = fact</span>
+          <span class="chip amber">Proposed = unvalidated</span>
+          <span class="chip red">Path, not proof</span>
         </div>
       </section>
 
       <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">1. Read this first</div>
-            <div class="title">How to read this deck</div>
-            <div class="subtitle">Before any claim, here is the discipline we are holding ourselves to.</div>
+        <div class="eyebrow fade-up">The problem</div>
+        <h1 class="title xwide fade-up">AI only sees what people bother to log.</h1>
+        <p class="sub fade-up">The actual work across apps, tabs, and keystrokes stays invisible.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">What it is</div>
+        <h1 class="title xwide fade-up">We read the work itself.</h1>
+        <p class="kicker fade-up">Installed on a computer. Processed locally. Sensitive data excluded at the daemon level.</p>
+        <div class="bottom-note fade-up">Cloud Go2 Desktop is SOC 2 compliant. The local-only pilot runs the same codebase, but is not separately certified.</div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">The proof point</div>
+        <div class="split">
+          <div>
+            <h1 class="title fade-up">Battlbox.</h1>
+            <p class="sub fade-up">One delivered third-party engagement. No gloss.</p>
           </div>
-          <div class="sectionno">01</div>
-        </div>
-        <div class="content">
-          <div class="legend">
-            <div class="card">
-              <div class="tag"><span class="dot green"></span>Green</div>
-              <div class="body"><strong>A fact we will stand behind:</strong> it came from our own operational records or a delivered client engagement.</div>
-            </div>
-            <div class="card">
-              <div class="tag"><span class="dot blue"></span>Proposed</div>
-              <div class="body"><strong>Our current thinking, not validated.</strong> Pricing is the main one. We will say “proposed” every time.</div>
-            </div>
-            <div class="card">
-              <div class="tag"><span class="dot amber"></span>Path, not proof</div>
-              <div class="body"><strong>A direction we are pursuing that has not closed.</strong> We will never call it a deal.</div>
-            </div>
+          <div class="right-stat fade-up">
+            <div class="label">Observed work</div>
+            <div class="big-number small">5,343</div>
+            <div class="mini">hours analyzed across 6 people over 6 months</div>
           </div>
-          <div class="card">
-            <div class="body">If a slide does not tell you which of these it is, that is a bug. Everything ends with a sourcing section so you can check our work.</div>
-            <div class="note" style="margin-top:14px">Note: This slide is a presentation framing choice, not a corpus fact.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Presentation framing from source content.</div>
         </div>
       </section>
 
       <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">2. The problem</div>
-            <div class="title">AI works on what you hand it; work happens where you don't</div>
-            <div class="subtitle">Today's AI tools only act on what someone explicitly hands them.</div>
-          </div>
-          <div class="sectionno">02</div>
+        <div class="eyebrow fade-up">What we found</div>
+        <div class="range fade-up">
+          <div class="big-number">80–85%</div>
+          <div class="suffix">automatable<br>manual work observed</div>
         </div>
-        <div class="content two-col">
-          <div class="card">
-            <div class="body">
-              A ticket. A CRM record. A chat log.<br><br>
-              The actual work — what a person does across their apps, tabs, and keystrokes all day — is invisible to those tools. So the highest-leverage, most repetitive work never gets automated, because nobody ever wrote it down.
-            </div>
+        <p class="sub fade-up">Equivalent to 190–250 hours per month in the Battlbox data.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Cost to produce the report</div>
+        <div class="split">
+          <div>
+            <div class="big-number fade-up">$15</div>
+            <p class="sub fade-up">about $15 in compute</p>
           </div>
-          <div class="card">
-            <div class="big-quote" style="font-size:clamp(22px,3vw,34px)">Go2 starts from the actual work instead of from the artifacts people remember to log.</div>
-            <div class="note" style="margin-top:18px">We deliberately do not quantify the size of this problem. Any market-size number would be invented.</div>
+          <div class="right-stat">
+            <div class="big-number small fade-up">~1 hr</div>
+            <div class="mini fade-up">processing time, with no human labor beyond triggering it</div>
           </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Vision doc §5.1 as cited in the source content.</div>
         </div>
       </section>
 
       <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">3. What it is</div>
-            <div class="title">One sentence we can defend</div>
-            <div class="subtitle">You put our software on someone's computer, we read what the work actually is, and we send back exactly how to fix it.</div>
-          </div>
-          <div class="sectionno">03</div>
-        </div>
-        <div class="content">
-          <div class="process">
-            <div class="step">
-              <div class="n">Step 1</div>
-              <div class="t">Capture locally</div>
-              <div class="d">Cowork.ai desktop app runs as a local background daemon capturing app and website usage, window titles, URLs, keystroke activity, and periodic screenshots interpreted locally via OCR.</div>
-            </div>
-            <div class="step">
-              <div class="n">Step 2</div>
-              <div class="t">Filter at source</div>
-              <div class="d">Every data stream is independently toggleable. Sensitive data — credit card numbers, SSNs, passwords — is detected and excluded at the daemon level before it ever touches disk.</div>
-            </div>
-            <div class="step">
-              <div class="n">Step 3</div>
-              <div class="t">Keep pilot local</div>
-              <div class="d">During the pilot the data lives in a local database on the worker's machine; nothing is uploaded or transmitted.</div>
-            </div>
-            <div class="step">
-              <div class="n">Step 4</div>
-              <div class="t">Return fixes</div>
-              <div class="d">The data is parsed into structured form and fed into an insight engine that produces a report telling operators where time is recoverable and what to automate.</div>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="card">
-              <h3>Cloud scope, precisely stated</h3>
-              <div class="body">The cloud version of the software, Go2 Desktop, is SOC 2 compliant.</div>
-            </div>
-            <div class="card">
-              <h3>Pilot scope, precisely stated</h3>
-              <div class="body">The local-only pilot daemon runs the same codebase but is not separately certified; on the pilot, the data simply never leaves the machine.</div>
-            </div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: pricing-brief.md and Workflow Discovery Pilot one-pager, as cited in the source content.</div>
+        <div class="eyebrow fade-up">Implementation</div>
+        <h1 class="title fade-up">Under 3 days.</h1>
+        <p class="sub fade-up">Estimated time to stand up the automations identified in the Battlbox engagement.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">What this does not prove</div>
+        <h1 class="statement fade-up">One delivered audit is not a pattern.</h1>
+        <p class="sub fade-up">It is one. We are not presenting a portfolio of automated clients.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Demand signal</div>
+        <div class="big-number fade-up">6 / 6</div>
+        <p class="sub fade-up">In one week, 6 Cowork demos ran and all 6 moved forward.</p>
+        <div class="bottom-note fade-up">This is a demo-close rate, not signed invoices.</div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Why the demos move</div>
+        <h1 class="quote fade-up">“Zero theater.”</h1>
+        <p class="sub fade-up">The demo runs on the prospect’s own data, not a canned example.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">What the documents support</div>
+        <h1 class="title xwide fade-up">Go2 started in workforce placement.</h1>
+        <p class="sub fade-up">The same telemetry daemon already served the hiring pipe. The software motion is the second half.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Why that matters</div>
+        <h1 class="statement fade-up">There is already an installed base in the exact ICP.</h1>
+        <p class="sub fade-up">Existing staffing clients are the distribution wedge and the data flywheel.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Who it is for</div>
+        <h1 class="title xwide fade-up">Back-office teams of roughly 5–25.</h1>
+        <p class="sub fade-up">Estimating, dispatch, AR, customer service, admin, support, bookkeeping.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Deliberate scope</div>
+        <h1 class="statement fade-up">Field labor is out. Fortune 500 is out.</h1>
+        <p class="sub fade-up">The ICP is narrow on purpose.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Go-to-market</div>
+        <h1 class="title xwide fade-up">SMB is the wedge.</h1>
+        <p class="sub fade-up">That is a deliberate choice, not a capability gap.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">The mistake</div>
+        <h1 class="statement fade-up">Splitting focus to chase a full enterprise motion was a mistake.</h1>
+        <p class="sub fade-up">Not because Go2 isn’t enterprise-ready. Because the wedge mattered more.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Why now</div>
+        <h1 class="title fade-up">December 2025.</h1>
+        <p class="sub fade-up">That is when the pipeline became technically possible. Roughly three months built the orchestration layer.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">The motion</div>
+        <h1 class="statement fade-up">Free pilot → paid audit → implementation retainer.</h1>
+        <p class="sub fade-up">Intelligence first. Automation second.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">The edge</div>
+        <h1 class="title xwide fade-up">Not a better model.</h1>
+        <p class="sub fade-up">The proprietary asset is the telemetry daemon and the workflow data it captures.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Honest caveat</div>
+        <div class="big-number small fade-up">6–12 mo</div>
+        <p class="sub fade-up">A well-funded competitor could replicate the pipeline in roughly 6–12 months.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">So what is defensible?</div>
+        <h1 class="statement fade-up">Speed. Data. Lock-in. Brand. Distribution.</h1>
+        <p class="sub fade-up">Provider-agnostic, sidecar by design.</p>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow fade-up">Pricing</div>
+        <h1 class="title fade-up">Proposed.</h1>
+        <p class="sub fade-up">Not validated. Ship a price, learn, adjust.</p>
+        <div class="chips fade-up">
+          <span class="chip accent">Free 2-week 1-person pilot</span>
+          <span class="chip accent">$500/person audit</span>
+          <span class="chip accent">$800/person/month retainer</span>
+          <span class="chip accent">$2,500/month per workflow</span>
         </div>
       </section>
 
       <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">4. The one proof point</div>
-            <div class="title">Battlbox, fully sourced</div>
-            <div class="subtitle">One delivered, third-party engagement. All of it, none of the gloss.</div>
-          </div>
-          <div class="sectionno">04</div>
-        </div>
-        <div class="content">
-          <div class="grid-4">
-            <div class="metric">
-              <div class="k">5,343</div>
-              <div class="l">hours of work analyzed across a 6-person team over 6 months</div>
-            </div>
-            <div class="metric">
-              <div class="k">190–250</div>
-              <div class="l">hours per month of automatable manual work found</div>
-            </div>
-            <div class="metric">
-              <div class="k">80–85%</div>
-              <div class="l">of total observed work was found to be automatable</div>
-            </div>
-            <div class="metric">
-              <div class="k">~$15</div>
-              <div class="l">compute cost to produce, with roughly one hour of processing and no human labor beyond triggering it</div>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="card">
-              <h3>Client and implementation</h3>
-              <ul class="clean">
-                <li><strong>Client:</strong> Battlbox, CEO John Roman. A 6-person team.</li>
-                <li><strong>Implementation estimate:</strong> under 3 days to stand up the automations.</li>
-                <li><strong>Status:</strong> Delivered.</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Delivered outputs</h3>
-              <ul class="clean">
-                <li>Full audit</li>
-                <li>Pricing calculator</li>
-                <li>Comment automation engine</li>
-                <li>Ops dashboard</li>
-                <li>Implementation playbooks</li>
-              </ul>
-            </div>
-          </div>
-          <div class="card">
-            <div class="big-quote" style="font-size:clamp(22px,2.6vw,32px)">One client. Delivered. We are not going to multiply it into a market.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Battlbox case study, pricing-brief.md / SPEC.md / andy-xavier-email.md, as cited in the source content.</div>
-        </div>
+        <div class="eyebrow fade-up">The ask</div>
+        <h1 class="statement fade-up">Fund the SMB wedge we can defend.</h1>
+        <p class="sub fade-up">We are not printing a check size or valuation on a slide the documents cannot support.</p>
       </section>
 
       <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">5. What it does not prove</div>
-            <div class="title">Said before you ask</div>
-            <div class="subtitle">A skeptic's first instinct is to find the gap, so here it is from us.</div>
-          </div>
-          <div class="sectionno">05</div>
-        </div>
-        <div class="content">
-          <div class="card">
-            <ul class="clean">
-              <li><strong>One delivered audit is not a pattern.</strong> It is one. We are not presenting a portfolio of automated clients.</li>
-              <li><strong>The economics number ($15 / ~1 hr / no human labor) is our cost to produce a report,</strong> stated by us. It is not a margin claim across a customer base.</li>
-              <li><strong>80–85% automatable is what we observed in the data,</strong> not what is contracted, running, and saving money in production today.</li>
-              <li><strong>The working tools are internal working prototypes</strong> against sample schema — they require API, auth, and data integration to run in a customer's live stack. We call them prototypes, not production tools.</li>
-            </ul>
-          </div>
-          <div class="card">
-            <div class="big-quote" style="font-size:clamp(22px,2.6vw,30px)">We would rather you hear these from us than catch us on them.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Corpus boundaries and caveats as summarized in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">6. Early demand signal</div>
-            <div class="title">A signal, not a conversion rate</div>
-            <div class="subtitle">In one week we ran 6 Cowork demos and all 6 moved forward.</div>
-          </div>
-          <div class="sectionno">06</div>
-        </div>
-        <div class="content equal">
-          <div class="card">
-            <div class="metric" style="min-height:auto; background:transparent; border:none; padding:0">
-              <div class="k">6 / 6</div>
-              <div class="l">demos advanced in one week</div>
-            </div>
-            <div class="body" style="margin-top:18px">
-              The reason they convert is there is zero theater — the demo runs on the prospect's own data, not a canned example.
-            </div>
-          </div>
-          <div class="card">
-            <div class="tag"><span class="dot amber"></span>Required caveat</div>
-            <div class="body"><strong>6 of 6 is a demo-close rate, not signed invoices.</strong> It is not a paid-conversion number, and we will not present it as one.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: pricing-brief.md and andy-xavier-email.md, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">7. The business underneath</div>
-            <div class="title">What the documents support</div>
-            <div class="subtitle">We are deliberately not putting financials on this slide that our own documents do not carry.</div>
-          </div>
-          <div class="sectionno">07</div>
-        </div>
-        <div class="content two-col">
-          <div class="card">
-            <ul class="clean">
-              <li>Go2 <strong>started as a workforce placement and management platform</strong>: job applicants installed the software, it observed how they worked, and it generated a work profile for matching.</li>
-              <li>The same <strong>telemetry daemon serves both jobs</strong>: matching and placing staff, and generating automation insights.</li>
-              <li>The software half of the product was already running in that hiring pipe; <strong>what is being shown here is the second half.</strong></li>
-            </ul>
-          </div>
-          <div class="card">
-            <ul class="clean">
-              <li>Go2 has an <strong>existing base of staffing clients with the software already installed</strong>, which is the distribution and data flywheel the new motion sits on top of.</li>
-              <li>The detailed monthly revenue, margin, churn, and cumulative-revenue numbers live in investor-call records and with co-founder Andy.</li>
-              <li><strong>They are not in the product/business documents this deck is sourced against, so they are not asserted here as green.</strong></li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Workflow Discovery Pilot company background and strategic integration thesis, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">8. Who this is for</div>
-            <div class="title">Narrow on purpose, de-risked by the existing base</div>
-            <div class="subtitle">The customer profile is narrow on purpose, and the existing staffing relationships are why the software claims are credible.</div>
-          </div>
-          <div class="sectionno">08</div>
-        </div>
-        <div class="content">
-          <div class="grid-3">
-            <div class="card">
-              <h3>ICP</h3>
-              <div class="body">Back-office knowledge workers at computers — estimating, dispatch, AR, customer service, admin, support, bookkeeping.</div>
-            </div>
-            <div class="card">
-              <h3>Team profile</h3>
-              <div class="body">Tech-tolerant operators running teams of roughly 5–25 people.</div>
-            </div>
-            <div class="card">
-              <h3>Explicitly out of scope</h3>
-              <div class="body">Field labor and Fortune 500 enterprise.</div>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="card">
-              <h3>The strategic thesis</h3>
-              <div class="body">Sell the AI layer into existing staffing clients. Because automation can reduce headcount per client, pricing has to offset lost subscription revenue — and the staffing relationships act as distribution plus a data flywheel.</div>
-            </div>
-            <div class="card">
-              <h3>The wedge</h3>
-              <div class="body">Go2 has an existing base of staffing clients with the software already installed — that is the wedge for distribution. Staffing is optional to the software thesis, but the installed base is real evidence of reach into the exact ICP.</div>
-            </div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: marion-cleanroom-pass.md, vision-doc ICP lines 68–72, integration thesis lines 82–94, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">9. Go-to-market</div>
-            <div class="title">A wedge we chose on purpose, including the mistakes</div>
-            <div class="subtitle">Failures included, because they are why the current motion is the right one.</div>
-          </div>
-          <div class="sectionno">09</div>
-        </div>
-        <div class="content">
-          <div class="grid-3">
-            <div class="card">
-              <h3>What went wrong</h3>
-              <div class="body">By end of 2023, AI was starting to cannibalize the staffing business. Chasing a full enterprise motion was called <strong>a focus-split mistake</strong> — not because the product was not enterprise-ready, but because it pulled the team off the wedge. SMB is the wedge.</div>
-            </div>
-            <div class="card">
-              <h3>Conflict resolved structurally</h3>
-              <div class="body">The old staffing model had a real conflict of interest: selling staffing meant no incentive to automate away your own revenue. As a standalone product motion, that structural incentive conflict is gone.</div>
-            </div>
-            <div class="card">
-              <h3>Why now</h3>
-              <div class="body">The pipeline became technically possible in <strong>December 2025</strong> and Go2 spent roughly <strong>three months</strong> building the orchestration layer on top of it.</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>The wedge motion</h3>
-            <div class="body"><strong>Sell managed SMB pilots now</strong> — a free 2-week, one-person pilot → a paid team audit → an implementation retainer — leading with intelligence first, automation second. Not a self-serve platform launch yet.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: andy-xavier-email.md and vision-doc §13, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">10. The edge</div>
-            <div class="title">The daemon and the data, not a better model</div>
-            <div class="subtitle">The defensible piece is the proprietary telemetry daemon and the granular workflow data it captures.</div>
-          </div>
-          <div class="sectionno">10</div>
-        </div>
-        <div class="content two-col">
-          <div class="card">
-            <ul class="clean">
-              <li>Go2 is <strong>not claiming a better AI than the labs.</strong></li>
-              <li>The proprietary asset is the <strong>telemetry daemon</strong> and the stream of what work actually is.</li>
-              <li>The product is deliberately <strong>harness- and AI-provider-agnostic</strong>, built on now-standard open building blocks.</li>
-              <li>It sits as a <strong>sidecar</strong> alongside Claude, ChatGPT, Codex, or Gemini — it does not need to own the chat window.</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>Honest limit, explicitly stated</h3>
-            <div class="body">The technical pipeline is replicable by a well-funded competitor in roughly <strong>6–12 months</strong>, so this is not a permanent tech moat.</div>
-            <div class="divider"></div>
-            <div class="body" style="margin-top:16px">
-              The defensibility being underwritten is <strong>speed to market, data network effects, implementation lock-in, a privacy-first/local-first brand, and existing installed-client distribution.</strong>
-            </div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: vision-doc and pricing-brief.md sections on edge, replicability, and sidecar posture, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">11. Enterprise</div>
-            <div class="title">Enterprise-ready; SMB is a deliberate choice</div>
-            <div class="subtitle">Not a failure. A focus decision.</div>
-          </div>
-          <div class="sectionno">11</div>
-        </div>
-        <div class="content">
-          <div class="card">
-            <div class="body">
-              The easy misread is that Go2 could not do enterprise. The opposite is what the source says: <strong>“we've been enterprise-ready.”</strong>
-              <br><br>
-              What was deprioritized — and called a mistake — was <strong>splitting focus to chase a full enterprise motion in this window.</strong> You cannot be enterprise-ready and run the SMB wedge hard at the same time, and the deliberate choice is the SMB side because that is what makes the IP more valuable.
-            </div>
-          </div>
-          <div class="card">
-            <div class="tag"><span class="dot amber"></span>What we will not say</div>
-            <div class="body">That there is a signed enterprise customer or a closed deal. No logo goes on this slide. If there is enterprise pull, it gets shown live against records — not asserted here as proof.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: andy-xavier-email.md and vision-doc §13, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">12. Pricing</div>
-            <div class="title">Current thinking, labeled proposed, not validated</div>
-            <div class="subtitle">Shown to be pressure-tested, not because it is locked.</div>
-          </div>
-          <div class="sectionno">12</div>
-        </div>
-        <div class="content">
-          <div class="pillrow">
-            <div class="pill">Proposed</div>
-            <div class="pill">Unvalidated</div>
-            <div class="pill">Ship a price, learn, adjust</div>
-          </div>
-          <div class="price-stack">
-            <div class="price">
-              <div class="tier">Tier 1</div>
-              <div class="amt">Free 1-person pilot</div>
-              <div class="desc">2 weeks of data — the hook.</div>
-            </div>
-            <div class="price">
-              <div class="tier">Tier 2</div>
-              <div class="amt">$500 / person</div>
-              <div class="desc">$2,500 minimum for a 5-person team audit, with data-period multipliers: 15d 0.8x / 30d 1.0x / 60d 1.2x.</div>
-            </div>
-            <div class="price">
-              <div class="tier">Tier 3</div>
-              <div class="amt">$800 / person / month</div>
-              <div class="desc">Implementation retainer, 3-month minimum.</div>
-            </div>
-            <div class="price">
-              <div class="tier">Tier 4</div>
-              <div class="amt">$2,500 / month</div>
-              <div class="desc">Per active automated workflow.</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Reference point for value</h3>
-            <div class="body">Traditional consulting equivalents run <strong>$25K–$50K</strong> over <strong>4–8 weeks</strong> and deliver a PDF with no implementation. This is value framing, not a claimed Go2 outcome.</div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: pricing-brief.md pricing stack and consulting comparison, as cited in the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">13. The ask</div>
-            <div class="title">Sized to what we can defend</div>
-            <div class="subtitle">Raise to scale the SMB wedge — the motion with a delivered proof point.</div>
-          </div>
-          <div class="sectionno">13</div>
-        </div>
-        <div class="content equal">
-          <div class="card">
-            <div class="body">
-              Go2 is deliberately <strong>not printing a specific check size or valuation on this slide.</strong> The precise raise figures and structure live in live fundraising conversations and are not carried in the product/business documents this deck is sourced against.
-            </div>
-          </div>
-          <div class="card">
-            <div class="body">
-              The ask will be sized directly, <strong>against the books</strong>, rather than anchoring to a number this deck cannot defend.
-              <br><br>
-              One discipline in that conversation: historical CAC behavior will be priced honestly rather than left for the investor to discover.
-            </div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Ask framing from the source content; specific raise sizes intentionally excluded.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">14. What you are underwriting</div>
-            <div class="title">Strip the hype. Here is the bet.</div>
-            <div class="subtitle">Green and clearly-labeled facts only.</div>
-          </div>
-          <div class="sectionno">14</div>
-        </div>
-        <div class="content">
-          <div class="grid-2">
-            <div class="card">
-              <ul class="clean">
-                <li><strong>A delivered proof point:</strong> Battlbox — 5,343 hours analyzed, 80–85% automatable found, ~$15 to produce, under 3 days to implement.</li>
-                <li><strong>A product that starts from the actual work:</strong> local telemetry daemon, sensitive-data excluded at the daemon, processed locally.</li>
-                <li><strong>A chosen wedge:</strong> free pilot → audit → retainer, with early caveated demand signal.</li>
-              </ul>
-            </div>
-            <div class="card">
-              <ul class="clean">
-                <li><strong>A proprietary telemetry daemon</strong> as the data asset, provider-agnostic and sidecar by design.</li>
-                <li><strong>An honest caveat:</strong> the pipeline is replicable in 6–12 months; the real moat is speed, data, lock-in, brand, and distribution.</li>
-                <li><strong>An origin as a workforce-placement platform</strong> whose hiring pipe already ran the software's first half.</li>
-              </ul>
-            </div>
-          </div>
-          <div class="card">
-            <div class="big-quote" style="font-size:clamp(22px,2.7vw,30px)">
-              If you back Go2, you are backing a real business with one delivered proof and a disciplined plan to make the second, third, and fourth — not a story inflated to get the meeting.
-            </div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Synthesis of slides 4, 6, 7, 8, and 10 from the source content.</div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <div class="topbar">
-          <div class="brand">
-            <div class="eyebrow">Sourcing</div>
-            <div class="title">Check the work</div>
-            <div class="subtitle">Each slide is grounded only in the provided source content.</div>
-          </div>
-          <div class="sectionno">15</div>
-        </div>
-        <div class="content">
-          <div class="card">
-            <div class="source-list">
-              <p><strong>Slide 1:</strong> Presentation framing. Discipline framing is a presentation choice, not a corpus fact.</p>
-              <p><strong>Slide 2:</strong> Vision doc §5.1 — Go2 starts from “the actual work” vs tickets/CRM/chat logs.</p>
-              <p><strong>Slide 3:</strong> Product one-liner and architecture — pricing-brief.md; Workflow Discovery Pilot one-pager. SOC 2 scope stated precisely: only cloud Go2 Desktop is SOC 2 compliant; local pilot daemon is not separately certified.</p>
-              <p><strong>Slide 4:</strong> Battlbox case study, pricing-brief.md / SPEC.md / andy-xavier-email.md — Battlbox / John Roman / 6 people; 5,343 hours over 6 months; 190–250 hours/month; ~80–85%; under 3 days; delivered tools and playbooks; cost to produce from cited docs.</p>
-              <p><strong>Slide 5:</strong> Corpus boundaries — single delivered client; cost-to-deliver vs margin; observed automatable vs production savings; prototype vs production tools.</p>
-              <p><strong>Slide 6:</strong> pricing-brief.md and andy-xavier-email.md — 6 demos in one week, all moved forward, on prospect's own data; caveat preserved.</p>
-              <p><strong>Slide 7:</strong> Workflow Discovery Pilot company background and strategic integration thesis — workforce placement origin, dual-purpose daemon, installed-client base. Financial figures intentionally excluded.</p>
-              <p><strong>Slide 8:</strong> marion-cleanroom-pass.md; vision-doc lines 68–72 and 82–94 — ICP, team size, out-of-scope segments, staffing integration thesis, installed base.</p>
-              <p><strong>Slide 9:</strong> andy-xavier-email.md and vision-doc §13 — end-2023 cannibalization, enterprise focus-split mistake, SMB wedge, Dec 2025 technical possibility, ~3 months building, managed SMB pilots now.</p>
-              <p><strong>Slide 10:</strong> vision-doc and pricing-brief.md — open framework / proprietary telemetry daemon, pipeline replicable in 6–12 months, real defensibility levers, sidecar posture.</p>
-              <p><strong>Slide 11:</strong> andy-xavier-email.md and vision-doc §13 — enterprise-ready, but deliberate SMB focus; no logo or closed-deal claim asserted.</p>
-              <p><strong>Slide 12:</strong> pricing-brief.md — full proposed Tier 1–4 stack, self-flagged as unvalidated; consulting comparison included as value framing.</p>
-              <p><strong>Slide 13:</strong> Doc-aligned posture — scale the SMB wedge; no valuation attached; specific raise sizes intentionally excluded.</p>
-              <p><strong>Slide 14:</strong> Synthesis of document-supported facts only.</p>
-              <p><strong>Excluded:</strong> All items flagged DO-NOT-USE or not in the DOCUMENTS section for this pass, including unsupported financials, forward projections, closed enterprise proofs, synthetic personas, install-scale claims, and flat unscoped SOC 2 claims.</p>
-            </div>
-          </div>
-        </div>
-        <div class="footer">
-          <div class="source">Source: Provided “Sourcing” section in the source content.</div>
-        </div>
+        <div class="eyebrow fade-up">What you are underwriting</div>
+        <h1 class="quote fade-up">A real business with one delivered proof.</h1>
+        <p class="sub fade-up">And a disciplined plan to make the second, third, and fourth.</p>
       </section>
 
     </div>
 
-    <div class="controls">
-      <div class="nav">
-        <button class="ctrl" id="prevBtn" aria-label="Previous slide">←</button>
-        <button class="ctrl" id="nextBtn" aria-label="Next slide">→</button>
+    <div class="nav">
+      <div class="controls">
+        <button class="btn" id="prevBtn" aria-label="Previous slide">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn" id="nextBtn" aria-label="Next slide">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="counter" id="counter">1 / 23</div>
       </div>
-      <div class="progress-wrap">
-        <div class="counter" id="counter">1 / 15</div>
+      <div class="status">
         <div class="dots" id="dots"></div>
       </div>
-      <div class="hint">Use ← → keys</div>
     </div>
   </div>
 
   <script>
-    (function(){
-      const slides = Array.from(document.querySelectorAll('.slide'));
-      const dotsWrap = document.getElementById('dots');
-      const counter = document.getElementById('counter');
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      let index = 0;
+    const slidesEl = document.getElementById('slides');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const dotsEl = document.getElementById('dots');
+    const counterEl = document.getElementById('counter');
+    const progressEl = document.getElementById('progress');
+    const total = slides.length;
+    let index = 0;
 
-      slides.forEach((_, i) => {
-        const b = document.createElement('button');
-        b.className = 'dotbtn';
-        b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-        b.addEventListener('click', () => goTo(i));
-        dotsWrap.appendChild(b);
-      });
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      dot.style.border = '0';
+      dot.style.padding = '0';
+      dot.addEventListener('click', () => goTo(i));
+      dotsEl.appendChild(dot);
+    });
 
-      const dots = Array.from(document.querySelectorAll('.dotbtn'));
+    const dots = Array.from(document.querySelectorAll('.dot'));
 
-      function render(){
-        slides.forEach((s, i) => {
-          s.classList.toggle('active', i === index);
-          s.classList.toggle('prev', i < index);
-        });
-        dots.forEach((d, i) => d.classList.toggle('active', i === index));
-        counter.textContent = `${index + 1} / ${slides.length}`;
-        prevBtn.disabled = index === 0;
-        nextBtn.disabled = index === slides.length - 1;
-        dots[index].scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    function update() {
+      slidesEl.style.transform = `translateX(-${index * 100}%)`;
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      dots.forEach((d, i) => d.classList.toggle('active', i === index));
+      counterEl.textContent = `${index + 1} / ${total}`;
+      progressEl.style.width = `${((index + 1) / total) * 100}%`;
+    }
+
+    function goTo(i){
+      index = Math.max(0, Math.min(total - 1, i));
+      update();
+    }
+
+    function next(){ goTo(index + 1); }
+    function prev(){ goTo(index - 1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        next();
       }
-
-      function goTo(i){
-        index = Math.max(0, Math.min(slides.length - 1, i));
-        render();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prev();
       }
-      function next(){ goTo(index + 1); }
-      function prev(){ goTo(index - 1); }
+      if (e.key === 'Home') goTo(0);
+      if (e.key === 'End') goTo(total - 1);
+    });
 
-      prevBtn.addEventListener('click', prev);
-      nextBtn.addEventListener('click', next);
+    let touchStartX = 0;
+    let touchEndX = 0;
 
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
-          e.preventDefault();
-          next();
-        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-          e.preventDefault();
-          prev();
-        } else if (e.key === 'Home') {
-          e.preventDefault();
-          goTo(0);
-        } else if (e.key === 'End') {
-          e.preventDefault();
-          goTo(slides.length - 1);
-        }
-      });
+    window.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, {passive:true});
 
-      let startX = null;
-      window.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-      }, {passive:true});
-      window.addEventListener('touchend', (e) => {
-        if (startX == null) return;
-        const dx = e.changedTouches[0].clientX - startX;
-        if (Math.abs(dx) > 50) {
-          if (dx < 0) next(); else prev();
-        }
-        startX = null;
-      }, {passive:true});
+    window.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      const dx = touchEndX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) next();
+        else prev();
+      }
+    }, {passive:true});
 
-      render();
-    })();
+    update();
   </script>
 </body>
 </html>

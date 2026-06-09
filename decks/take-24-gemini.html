@@ -3,23 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go2 — Investor Presentation</title>
+    <title>Go2 | One Engagement, Start to Finish</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #09090b; /* Zinc 950 */
-            --text-main: #f4f4f5; /* Zinc 100 */
-            --text-muted: #a1a1aa; /* Zinc 400 */
-            --accent: #3b82f6; /* Blue 500 */
-            --border: #27272a; /* Zinc 800 */
-            --surface: #18181b; /* Zinc 900 */
-            
-            --font-sans: 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            
-            --nav-height: 80px;
+            --bg-color: #050505;
+            --text-main: #FFFFFF;
+            --text-muted: #A1A1AA;
+            --accent: #6366F1; /* Electric Indigo */
+            --accent-glow: rgba(99, 102, 241, 0.15);
         }
 
         * {
@@ -29,22 +23,20 @@
         }
 
         body {
-            font-family: var(--font-sans);
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            overflow: hidden; /* Prevent scrolling, handle via JS */
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% -20%, var(--accent-glow) 0%, var(--bg-color) 70%);
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* Slide Container */
-        #deck {
+        /* Slide Container & Transitions */
+        .deck {
             position: relative;
-            width: 100vw;
-            height: calc(100vh - var(--nav-height));
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 100%;
+            height: 100%;
         }
 
         .slide {
@@ -53,596 +45,376 @@
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            transform: translateY(15px);
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 4rem;
+            padding: 0 12vw;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .slide.active {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
-            z-index: 10;
         }
 
-        /* Content Layout */
-        .content-wrapper {
-            max-width: 1100px;
+        .slide-content {
+            max-width: 1200px;
             width: 100%;
-            margin: 0 auto;
         }
 
-        .kicker {
-            font-family: var(--font-mono);
-            color: var(--accent);
-            font-size: 0.875rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .kicker::after {
-            content: "";
-            height: 1px;
-            width: 40px;
-            background-color: var(--accent);
-        }
-
+        /* Typography */
         h1 {
-            font-size: clamp(2.5rem, 4vw, 4rem);
-            font-weight: 400;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-            margin-bottom: 3rem;
-            max-width: 900px;
-        }
-
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 4rem;
-            align-items: start;
-        }
-
-        .main-text {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            font-weight: 300;
-        }
-
-        .main-text p {
-            margin-bottom: 1.5rem;
-        }
-
-        .main-text strong {
+            font-size: clamp(3rem, 6vw, 7rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+            margin-bottom: 2.5rem;
             color: var(--text-main);
-            font-weight: 500;
         }
 
-        /* Callout Box */
-        .callout {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            padding: 2.5rem;
-            border-radius: 4px;
+        h1 .highlight {
+            color: var(--accent);
         }
 
-        .callout-title {
-            font-family: var(--font-mono);
-            font-size: 0.875rem;
-            color: var(--text-main);
+        .mega-number {
+            font-size: clamp(6rem, 14vw, 16rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 1;
             margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            color: var(--text-main);
+            display: block;
         }
 
-        .callout-text {
-            font-size: 1.125rem;
+        p.lead {
+            font-size: clamp(1.25rem, 2.5vw, 2.25rem);
+            font-weight: 400;
             color: var(--text-muted);
+            max-width: 38ch;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
         }
 
-        /* Title Slide Specifics */
-        .title-slide h1 {
-            font-size: clamp(3rem, 5vw, 5rem);
-            margin-bottom: 1.5rem;
-        }
-        .title-slide .subtitle {
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            max-width: 800px;
-            font-weight: 300;
+        .quote {
+            border-left: 4px solid var(--accent);
+            padding-left: 2rem;
+            margin-left: -2rem;
         }
 
-        /* Navigation Bar */
-        #nav-bar {
+        .quote p {
+            font-size: clamp(1.5rem, 3vw, 3rem);
+            font-weight: 500;
+            color: var(--text-main);
+            max-width: 30ch;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
+        }
+
+        /* Controls */
+        .ui-layer {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--nav-height);
-            background-color: var(--bg-color);
-            border-top: 1px solid var(--border);
+            bottom: 4vw;
+            left: 4vw;
+            right: 4vw;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
+            align-items: flex-end;
             z-index: 100;
+            pointer-events: none;
         }
 
-        .nav-group {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            min-width: 150px;
-        }
-
-        .nav-group.right {
-            justify-content: flex-end;
-        }
-
-        button.nav-btn {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            font-family: var(--font-sans);
-            font-size: 0.875rem;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        button.nav-btn:hover:not(:disabled) {
-            background-color: var(--surface);
-            border-color: var(--text-muted);
-        }
-
-        button.nav-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        #counter {
-            font-family: var(--font-mono);
-            font-size: 0.875rem;
+        .counter {
+            font-size: 1rem;
+            font-weight: 500;
             color: var(--text-muted);
+            letter-spacing: 0.1em;
+            pointer-events: auto;
         }
 
-        /* Dots */
-        #dots {
+        .progress-dots {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            pointer-events: auto;
+            margin-bottom: 0.5rem;
         }
 
         .dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background-color: var(--border);
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .dot:hover {
-            background-color: var(--text-muted);
         }
 
         .dot.active {
-            background-color: var(--accent);
+            background: var(--accent);
+            transform: scale(1.5);
         }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .grid-layout {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-            .slide {
-                padding: 2rem;
-            }
-            h1 {
-                margin-bottom: 2rem;
-            }
-            #dots {
-                display: none; /* Hide dots on smaller screens for space */
-            }
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            pointer-events: auto;
+        }
+
+        button.nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button.nav-btn:hover {
+            background: var(--text-main);
+            color: var(--bg-color);
+            border-color: var(--text-main);
+        }
+
+        button.nav-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .slide { padding: 0 8vw; }
+            .ui-layer { bottom: 6vw; left: 6vw; right: 6vw; }
+            .progress-dots { display: none; } /* Simplify mobile UI */
         }
     </style>
 </head>
 <body>
 
-    <div id="deck">
+    <div class="deck" id="deck">
         
-        <!-- Slide 0: Title -->
-        <div class="slide active title-slide">
-            <div class="content-wrapper">
-                <div class="kicker">Thesis</div>
-                <h1>Go2 — One Engagement,<br>Start to Finish</h1>
-                <div class="subtitle">
-                    Skip the narrative and watch one real engagement run end to end. What we saw, what we built, what it cost, and what it was worth. If the before/after holds up under scrutiny, the rest of the model is just repetition.
-                </div>
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="slide-content">
+                <h1>Go2</h1>
+                <p class="lead">Skip the narrative. Watch one real engagement run end to end. If the before/after holds up, the model is just repetition.</p>
             </div>
         </div>
 
-        <!-- Slide 1: The Before -->
+        <!-- Slide 2 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">01 / The Before</div>
-                <h1>A 6-person team with a blind spot.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>Battlbox is a real, delivered Go2 engagement. CEO John Roman, 6-person team.</p>
-                        <p>Before we touched it, the team ran the way most back-office teams run: people moving between tools all day, with no instrumented record of where the hours actually went or which of them were recoverable.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">The Honest Gap</div>
-                        <div class="callout-text">
-                            AI tools only work on what people explicitly hand them. Go2 works from what people <strong>actually do</strong>. Until you measure the actual work, "where should we automate?" is a guess.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>The Blind Spot</h1>
+                <p class="lead">AI tools only work on what people explicitly hand them. Go2 works from what people <span style="color: #fff">actually do</span>. Until you measure the work, automation is a guess.</p>
             </div>
         </div>
 
-        <!-- Slide 2: The Install -->
+        <!-- Slide 3 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">02 / The Installation</div>
-                <h1>The same daemon, watching the real work locally.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>We installed our telemetry daemon on the team's machines. It captures keystrokes, app usage, URLs, idle time, and workflow patterns locally, plus periodic screenshots interpreted on-device via OCR (~every 20s).</p>
-                        <p>Sensitive data—card numbers, SSNs, passwords—is detected and excluded at the daemon level before it ever touches disk. Every stream is independently toggleable.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Existing Architecture</div>
-                        <div class="callout-text">
-                            This is not a new product. It closes the loop on a system we already had. The same daemon that built a work profile to match applicants now feeds the automation insight engine. One capture layer, two purposes.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>The Before</h1>
+                <p class="lead">A 6-person team at Battlbox. Moving between tools all day, with no instrumented record of where hours went or what was recoverable.</p>
             </div>
         </div>
 
-        <!-- Slide 3: The Measurement -->
+        <!-- Slide 4 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">03 / The Measurement</div>
-                <h1>5,343 hours observed.<br>Most of it automatable.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>Over roughly six months we analyzed <strong>5,343 hours</strong> of observed work across the 6 people.</p>
-                        <p>The finding: <strong>190–250 hours per month</strong> of automatable work—about 80–85% of the observed work. That is the "before" turned into a number, derived from actual work rather than estimated from a survey.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Auditable Math</div>
-                        <div class="callout-text">
-                            The report doesn't hand you a single bravado number. Automation opportunities are ranked by impact with confidence scores, and the recoverable-hours estimate ships with its assumptions stated.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>Local Telemetry</h1>
+                <p class="lead">One capture layer. Two purposes. Our daemon watches real work locally—keystrokes, apps, idle time. Sensitive data is excluded before it ever touches disk.</p>
             </div>
         </div>
 
-        <!-- Slide 4: The Build -->
+        <!-- Slide 5 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">04 / The Build</div>
-                <h1>Working tools, not a PDF of suggestions.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>The deliverable was not a slide that says "you could automate this." Our golden rule is the opposite: don't describe what could be done—build it and deliver it.</p>
-                        <p>For Battlbox we shipped a pricing calculator, a comment automation engine, an ops dashboard, and implementation playbooks. Implementation estimate: <strong>under 3 days</strong>.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Honest Scope</div>
-                        <div class="callout-text">
-                            Because you should be skeptical: these are internal working prototypes built against sample schema. Standing them up in production requires API, auth, and data integration.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <span class="mega-number">5,343</span>
+                <p class="lead">Hours analyzed over 6 months across 6 people. The finding: <span style="color: #fff">80–85%</span> of observed work was automatable (190–250 hours per month).</p>
             </div>
         </div>
 
-        <!-- Slide 5: The Proof -->
+        <!-- Slide 6 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">05 / The Proof Point</div>
-                <h1>The before/after delta.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>The single most valuable data point in any engagement is the after: leave the daemon on and measure actual time saved against the pre-automation baseline.</p>
-                        <p>That before-and-after measurement is offered as an optional follow-up—the daemon stays on two weeks later to measure real recovered hours. It is the client's call, never automatic.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">The Discipline</div>
-                        <div class="callout-text">
-                            The report is a hypothesis; the post-automation measurement is the proof. We'd rather show you a measured delta than a projected one.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>Working Tools,<br>Not PDFs</h1>
+                <p class="lead">We don't describe what could be done. We build it. We shipped a pricing calculator, comment engine, and ops dashboard in under 3 days.</p>
             </div>
         </div>
 
-        <!-- Slide 6: The Cost -->
+        <!-- Slide 7 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">06 / Unit Economics</div>
-                <h1>What that engagement cost us to produce.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>The asymmetry is why this is a business. The market comparable: $25K–$50K, 4–8 weeks, and you get a PDF with no implementation.</p>
-                        <p>Our cost to generate one audit is about <strong>$15 in raw compute</strong> and roughly an hour of processing, with no human labor beyond triggering the analysis.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Precision Over Bravado</div>
-                        <div class="callout-text">
-                            The ~$15 is raw compute for one report. The realistic buyer-facing monthly AI/compute figure to plan against is <strong>$300–500/mo</strong>. Anchor on the honest operating number.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>The Measured Delta</h1>
+                <p class="lead">The report is a hypothesis. The post-automation measurement is the proof. We optionally leave the daemon on to measure real recovered hours.</p>
             </div>
         </div>
 
-        <!-- Slide 7: The Conflict -->
+        <!-- Slide 8 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">07 / The Conflict</div>
-                <h1>Why we ran Battlbox at all.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>I won't pretend Battlbox was pure altruism. We were losing $1,200/month on that account as a staffing client. The audit was the clean way to transition the team directly to John and exit staffing on good terms.</p>
-                        <p>The old staffing model had a built-in conflict: selling staffing meant no incentive to automate away our own revenue.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Alignment</div>
-                        <div class="callout-text">
-                            By end of 2023 we watched AI cannibalize existing staffing spend. Standalone, sold to the right buyer, that conflict is gone. The audit and automation are now aligned with the customer.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>$15 <span style="color: #555">vs.</span> $50,000</h1>
+                <p class="lead">The market charges $25K–$50K and takes 8 weeks for a PDF. Our raw compute cost to generate an audit: <span style="color: #fff">~$15 and 1 hour.</span> Zero human labor.</p>
             </div>
         </div>
 
-        <!-- Slide 8: Repeatability -->
+        <!-- Slide 9 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">08 / Repeatability</div>
-                <h1>The early signal: zero theater.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>Battlbox is one data point. The early repeat signal: in one week we ran 6 demos and 6 of 6 moved forward.</p>
-                        <p>This is demo conversion on the prospect's <strong>own data</strong>, not signed-invoice data. It converts because there's no theater: every demo runs on the buyer's actual workflow, not a canned example.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Don't Sell The Outcome</div>
-                        <div class="callout-text">
-                            Most teams do not act on insights even when obvious—they spin in circles. We sell the audit, built tools, and a managed retainer to ensure the work actually gets implemented.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>The Conflict<br>Is Gone</h1>
+                <p class="lead">We ran this because we were losing $1,200/mo on Battlbox as a staffing client. Standalone, our incentives are finally aligned with the customer instead of against them.</p>
             </div>
         </div>
 
-        <!-- Slide 9: The Motion -->
+        <!-- Slide 10 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">09 / The Motion</div>
-                <h1>Intelligence first, automation second.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>The wedge is the audit. Free 1-person, 2-week pilot as the hook; full team audit; then an implementation retainer to do the building and maintenance.</p>
-                        <p>We are deliberately selling managed SMB pilots now—not a self-serve platform—keeping the core workflow-truth and control plane closed while we prove the market.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Unvalidated Pricing</div>
-                        <div class="callout-text">
-                            Proposed stack: pilot free, team audit, monthly retainer, runtime. It is <strong>explicitly not yet validated</strong>. The posture is ship a price, learn, adjust.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <span class="mega-number">6 for 6</span>
+                <p class="lead">In one week: 6 demos, 6 moved forward. Why? Zero theater. Every demo converts on the prospect’s actual workflow, not a canned example.</p>
             </div>
         </div>
 
-        <!-- Slide 10: The Edge -->
+        <!-- Slide 11 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">10 / The Edge</div>
-                <h1>The data feed is the moat.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>The defensible part isn't the report—it's what it's built from. Competitors start from tickets, CRM, or chat. Go2 starts from actual work: a faster, more granular feed.</p>
-                        <p>Seat and usage billers are structurally disincentivized to optimize away seats. Our incentive points the other way.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Defensibility</div>
-                        <div class="callout-text">
-                            The pipeline is replicable in 6–12 months. The durable moat is speed to market, the data network effect, implementation lock-in, and a privacy-first posture—not the code.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>Intelligence First</h1>
+                <p class="lead">The wedge is the audit. Free 1-person pilot, full team audit, then an implementation retainer. We sell the audit and built tools, not unvalidated outcomes.</p>
             </div>
         </div>
 
-        <!-- Slide 11: Compliance -->
+        <!-- Slide 12 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">11 / Compliance</div>
-                <h1>Safe to run at scale: local-first.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>The reason an enterprise can let us in: data lives in a local database on the worker's machine, protected by that machine's existing security. Nothing is uploaded or transmitted during the pilot.</p>
-                        <p>Optional end-of-pilot zero-data-retention cloud processing is decided together, never automatic.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">SOC 2 Nuance</div>
-                        <div class="callout-text">
-                            The cloud Go2 Desktop is SOC 2 compliant. The pilot daemon is the same codebase, but data stays local. The local daemon is not separately certified; it relies on the machine's security.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>The Data Feed</h1>
+                <p class="lead">Competitors start from tickets or chat logs. We start from a faster, granular feed of actual work. The durable moat is speed, data, and implementation lock-in.</p>
             </div>
         </div>
 
-        <!-- Slide 12: Enterprise -->
+        <!-- Slide 13 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">12 / Enterprise Path</div>
-                <h1>A credible direction, not closed proof.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>We have been enterprise-ready. The deliberate choice is to run the SMB audit wedge now because it makes the IP more valuable. You can't harden enterprise and run the SMB motion at full speed in the same window.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">The Scrutiny</div>
-                        <div class="callout-text">
-                            Large conversations have tended to drift toward JV or acquisition. I'm presenting enterprise as a direction with real pull, not a signed outcome.
-                        </div>
-                    </div>
-                </div>
+            <div class="slide-content">
+                <h1>Local-First</h1>
+                <p class="lead">Safe to run at scale. Data lives in a local database on the worker’s machine. Nothing is transmitted during the pilot.</p>
             </div>
         </div>
 
-        <!-- Slide 13: The Ask -->
+        <!-- Slide 14 -->
         <div class="slide">
-            <div class="content-wrapper">
-                <div class="kicker">13 / The Ask</div>
-                <h1>Under-promise, let the work talk.</h1>
-                <div class="grid-layout">
-                    <div class="main-text">
-                        <p>Read the rest the way you read Battlbox: one delivered engagement, instrumented, honest about cost and scope, repeatable as a managed motion.</p>
-                        <p>The thing already exists; what's left is doing it more, with the discipline you'd demand.</p>
-                    </div>
-                    <div class="callout">
-                        <div class="callout-title">Use of Funds</div>
-                        <div class="callout-text">
-                            Unglamorous on purpose: a sales team, marketing funnel, hardening the story, and engineering to make the enterprise path real. I favor keeping meaningful dry powder.
-                        </div>
-                    </div>
+            <div class="slide-content">
+                <h1>A Credible Path</h1>
+                <p class="lead">We are enterprise-ready, but we run the SMB audit wedge now because it makes the IP more valuable. Enterprise is a direction with real pull, not closed proof.</p>
+            </div>
+        </div>
+
+        <!-- Slide 15 -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="quote">
+                    <p>"I'd rather under-promise here and let the next delivered before/after do the talking."</p>
                 </div>
+                <br><br>
+                <p class="lead">The product exists. Use of funds: sales, marketing, enterprise engineering, and dry powder.</p>
             </div>
         </div>
 
     </div>
 
-    <!-- Navigation -->
-    <div id="nav-bar">
-        <div class="nav-group left">
-            <button id="prevBtn" class="nav-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                Prev
-            </button>
-            <span id="counter">1 / 14</span>
-        </div>
+    <!-- Persistent UI Layer -->
+    <div class="ui-layer">
+        <div class="counter" id="counter">01 / 15</div>
         
-        <div id="dots">
+        <div class="progress-dots" id="dots-container">
             <!-- Dots generated by JS -->
         </div>
 
-        <div class="nav-group right">
-            <button id="nextBtn" class="nav-btn">
-                Next
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="prevSlide()" aria-label="Previous Slide">
+                <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+            </button>
+            <button class="nav-btn" onclick="nextSlide()" aria-label="Next Slide">
+                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
             </button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const slides = document.querySelectorAll('.slide');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const counter = document.getElementById('counter');
-            const dotsContainer = document.getElementById('dots');
-            
-            let currentSlide = 0;
-            const totalSlides = slides.length;
+        const slides = document.querySelectorAll('.slide');
+        const dotsContainer = document.getElementById('dots-container');
+        const counter = document.getElementById('counter');
+        let currentSlide = 0;
+        const totalSlides = slides.length;
 
-            // Initialize Dots
-            for (let i = 0; i < totalSlides; i++) {
-                const dot = document.createElement('div');
-                dot.classList.add('dot');
-                if (i === 0) dot.classList.add('active');
-                dot.addEventListener('click', () => goToSlide(i));
-                dotsContainer.appendChild(dot);
-            }
-            const dots = document.querySelectorAll('.dot');
+        // Initialize dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
 
-            function updateUI() {
-                // Update Slides
-                slides.forEach((slide, index) => {
-                    if (index === currentSlide) {
-                        slide.classList.add('active');
-                    } else {
-                        slide.classList.remove('active');
-                    }
-                });
-
-                // Update Counter
-                counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
-
-                // Update Dots
-                dots.forEach((dot, index) => {
-                    if (index === currentSlide) {
-                        dot.classList.add('active');
-                    } else {
-                        dot.classList.remove('active');
-                    }
-                });
-
-                // Update Buttons
-                prevBtn.disabled = currentSlide === 0;
-                nextBtn.disabled = currentSlide === totalSlides - 1;
-            }
-
-            function goToSlide(index) {
-                if (index >= 0 && index < totalSlides) {
-                    currentSlide = index;
-                    updateUI();
-                }
-            }
-
-            function nextSlide() {
-                if (currentSlide < totalSlides - 1) {
-                    currentSlide++;
-                    updateUI();
-                }
-            }
-
-            function prevSlide() {
-                if (currentSlide > 0) {
-                    currentSlide--;
-                    updateUI();
-                }
-            }
-
-            // Event Listeners for Buttons
-            prevBtn.addEventListener('click', prevSlide);
-            nextBtn.addEventListener('click', nextSlide);
-
-            // Event Listeners for Keyboard
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight' || e.key === ' ') {
-                    nextSlide();
-                } else if (e.key === 'ArrowLeft') {
-                    prevSlide();
+        function updateUI() {
+            // Update slides
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
                 }
             });
 
-            // Initial UI setup
+            // Update dots
+            dots.forEach((dot, index) => {
+                if (index === currentSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            // Update counter
+            const slideNum = (currentSlide + 1).toString().padStart(2, '0');
+            const totalNum = totalSlides.toString().padStart(2, '0');
+            counter.innerText = `${slideNum} / ${totalNum}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateUI();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
             updateUI();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
         });
+
+        // Initialize counter
+        updateUI();
     </script>
 </body>
 </html>
